@@ -28,10 +28,16 @@ def get_model(model_name: Architecture, model_conf: Dict):
 
 def get_config(model: Architecture):
     conf = None
+    cwd = Path().absolute()
     if model == Architecture.GAN:
-        conf = yaml.safe_load(Path('/home/stella/ligand_predicition/models/GAN/gan_config.yaml').read_text())
+        file = 'GAN/gan_config.yaml'
+        conf = yaml.safe_load(Path(f'{cwd}/models/{file}').read_text())
     elif model == Architecture.VAE:
+        file = None
         conf = yaml.safe_load(Path('GAN/gan_config.yaml').read_text())
     elif model == Architecture.TRANSFORMER:
+        file = None
         conf = yaml.safe_load(Path('GAN/gan_config.yaml').read_text())
     return conf
+
+Path().absolute()
