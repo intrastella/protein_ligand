@@ -1,5 +1,6 @@
 import datetime
 import logging
+from pathlib import Path
 from typing import Dict
 
 import pandas as pd
@@ -21,7 +22,8 @@ from data.MolEnums import MolType
 from utils import df_to_tensor
 
 
-logging.basicConfig(filename="/home/stella/ligand_predicition/std.log",
+cwd = Path().absolute()
+logging.basicConfig(filename=f"{cwd}/std.log",
                     format='%(asctime)s %(message)s',
                     filemode='w')
 logger = logging.getLogger(__name__)

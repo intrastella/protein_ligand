@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import List
 from typing import Union
 
@@ -10,7 +11,8 @@ from data.MolEnums import MolType
 from data.MolEnums import MolDataStruct
 from data.molecular_matrix import Smile2Mat
 
-logging.basicConfig(filename="/home/stella/ligand_predicition/std.log",
+cwd = Path().absolute()
+logging.basicConfig(filename=f"{cwd}/std.log",
                     format='%(asctime)s %(message)s',
                     filemode='w')
 logger = logging.getLogger(__name__)

@@ -11,8 +11,8 @@ from data.db_tools import SQL_Session
 from models.GAN.data_loader import get_loader
 from models.arch_utils import Architecture, get_model, get_config
 
-
-logging.basicConfig(filename="/home/stella/ligand_predicition/std.log",
+cwd = Path().absolute()
+logging.basicConfig(filename=f"{cwd}/std.log",
                     format='%(asctime)s %(message)s',
                     filemode='w')
 logger = logging.getLogger(__name__)

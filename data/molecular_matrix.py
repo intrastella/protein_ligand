@@ -18,7 +18,8 @@ from data.db_tools import SQL_Session
 from utils import one_hot_enc, pad_tensor, pad_batch
 
 
-logging.basicConfig(filename="/home/stella/ligand_predicition/std.log",
+cwd = Path().absolute()
+logging.basicConfig(filename=f"{cwd}/std.log",
                     format='%(asctime)s %(message)s',
                     filemode='w')
 logger = logging.getLogger(__name__)
