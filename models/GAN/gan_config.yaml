@@ -1,0 +1,22 @@
+model:
+    name: "GAN"
+
+Hyperparameter:
+    channels: 3
+    latent_dim: 100
+    h_size: 274
+    w_size: 81
+    batch_size: 60
+    training_steps: 200
+    n_epoch: 1
+    lr: 0.0002
+    b1: 0.5
+    b2: 0.999
+
+data:
+    db_name: ligand_protein
+    mol_struct: smile
+    mol_type: ligand
+    batch_size: 60
+    table_names: None
+    amount: 5
