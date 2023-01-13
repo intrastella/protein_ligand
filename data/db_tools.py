@@ -23,11 +23,12 @@ from utils import df_to_tensor
 
 
 cwd = Path().absolute()
-logging.basicConfig(filename=f"{cwd}/std.log",
-                    format='%(asctime)s %(message)s',
+logging.basicConfig(level=logging.INFO,
+                    filename=f'{cwd}/std.log',
+                    format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
                     filemode='w')
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler())
 
 
 class SQL_Session:

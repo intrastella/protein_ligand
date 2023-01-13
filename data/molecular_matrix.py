@@ -21,9 +21,11 @@ from utils import one_hot_enc, pad_tensor, pad_batch
 
 cwd = Path().absolute()
 logging.basicConfig(level=logging.INFO,
+                    filename=f'{cwd}/std.log',
                     format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
-                    datefmt="%d/%b/%Y %H:%M:%S")
+                    filemode='w')
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
 
 
 class Smile2Mat:
@@ -102,8 +104,7 @@ class Smile2Mat:
         """
 
         data_list = []
-        progress_bar = tqdm(enumerate(smiles), total=len(smiles))
-        for idx, smile in enumerate(smiles):
+        for smile in smiles:
             self.mol = Chem.MolFromSmiles(smile)
 
             (n_nodes, n_edges, n_node_features, n_edge_features) = self.get_sizes()
@@ -115,7 +116,6 @@ class Smile2Mat:
 
             padded = pad_tensor([adj_mat, mol_nodes, mol_edges])
             data_list.append(padded)
-            progress_bar.set_description(f"[{idx} / {len(smiles)}] smiles data converted. ")
 
         dataset = pad_batch(data_list)
         if db_insertion:
@@ -214,7 +214,7 @@ class Smile2Mat:
                     amount = len(dataset)
                 for i in tqdm(range(amount)):
                     self.smiles.append(dataset[i]['smiles'])
-                logger.info(f"{len(dataset)} smiles have been loaded from path.")
+                logger.info(f"{amount} smiles have been loaded from path.")
 
             mol_feat = self.smiles2data(self.smiles, db_name, mol_type=mol_type, db_insertion=db_insertion)
 

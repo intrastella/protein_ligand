@@ -13,9 +13,11 @@ from data.molecular_matrix import Smile2Mat
 
 cwd = Path().absolute()
 logging.basicConfig(level=logging.INFO,
+                    filename=f'{cwd}/std.log',
                     format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
-                    datefmt="%d/%b/%Y %H:%M:%S")
+                    filemode='w')
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
 
 
 def get_loader(db_name: str,

@@ -1,4 +1,7 @@
 import logging
+import pathlib
+from datetime import datetime
+from pathlib import Path
 
 import sklearn
 from keras import backend
@@ -14,11 +17,20 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 import torchvision
 
+from models.model_utils import calculate_gradient_penalty
 
+
+cwd = Path().absolute()
+logging.basicConfig(level=logging.INFO,
+                    filename=f'{cwd}/std.log',
+                    format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+                    filemode='w')
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
 
 
 cuda_C = True if torch.cuda.is_available() else False
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class Generator(nn.Module):
@@ -96,6 +108,7 @@ class GAN:
                  batch_size: int = 60,
                  training_steps: int = 200,
                  n_epoch: int = 5,
+                 n_critic: int = 5,
                  lr: float = 0.0002,
                  b1: float = 0.5,
                  b2: float = 0.999):
@@ -110,41 +123,43 @@ class GAN:
         self.batch_size = batch_size
         self.training_steps = training_steps
         self.n_epoch = n_epoch
+        self.n_critic = n_critic
         self.latent_dim = latent_dim
 
         # Models
         self.generator = Generator(latent_dim)
         self.discriminator = Discriminator()
 
-        # loss
-        self.loss = nn.BCELoss()
-        # kl_loss = nn.KLDivLoss(reduction="batchmean")
-
         if cuda_C:
             self.generator.cuda()
             self.discriminator.cuda()
-            self.loss.cuda()
 
         # Optimizers
         self.generator_optimizer = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
         self.discriminator_optimizer = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
 
-    def fit(self, data: DataLoader):
+    def fit(self, data: DataLoader, exp_dir: Path):
         self.dataloader = data
         self.discriminator.train()
         self.generator.train()
 
+        logger.info('Start training:')
+
         for epoch in range(self.n_epoch):
-            self.train(epoch)
+            self.train(epoch, exp_dir)
 
-    def train(self, epoch):
+        logger.info('Training finished.')
+
+    def train(self, epoch, exp_dir: Path):
         running_loss = 0.0
-        progress_bar = tqdm(enumerate(self.dataloader), total=len(self.dataloader))
 
-        for step, mat in enumerate(self.dataloader):
+        for step, mat in tqdm(enumerate(self.dataloader)):
             total_step = len(self.dataloader) * epoch + step
 
-            tb = SummaryWriter()
+            folder = f'{exp_dir}/runs'
+            p = pathlib.Path(folder)
+            p.mkdir(parents=True, exist_ok=True)
+            tb = SummaryWriter(folder)
 
             Tensor = torch.cuda.FloatTensor if cuda_C else torch.FloatTensor
 
@@ -153,45 +168,54 @@ class GAN:
             real_lig = Variable(mat.type(Tensor))
             noise = Variable(Tensor(np.random.normal(0, 1, (mat.shape[0], self.latent_dim))))
 
-            # -----------------
-            #  Train Generator
-            # -----------------
-            self.generator_optimizer.zero_grad()
-
-            generated_data = self.generator(noise)
-            generator_discriminator_out = self.discriminator(generated_data)
-
-            # w/ KL div
-            # log_out = F.log_softmax(generator_discriminator_out, dim=0)
-            # gen_loss = kl_loss(log_out, true_labels)
-
-            generator_loss = self.loss(generator_discriminator_out, valid)
-            generator_loss.backward()
-            self.generator_optimizer.step()
-
             # ---------------------
             #  Train Discriminator
             # ---------------------
-            self.discriminator_optimizer.zero_grad()
 
-            true_discriminator_out = self.discriminator(real_lig)
-            true_discriminator_loss = self.loss(true_discriminator_out, valid)
+            self.discriminator.zero_grad()
+            real_output = self.discriminator(real_lig)
+            errD_real = torch.mean(real_output)
+            D_x = real_output.mean().item()
 
-            generator_discriminator_out = self.discriminator(generated_data.detach())
-            generator_discriminator_loss = self.loss(generator_discriminator_out, fake)
+            fake_lig = self.generator(noise)
 
-            discriminator_loss = (true_discriminator_loss + generator_discriminator_loss) / 2
-            discriminator_loss.backward()
+            fake_output = self.discriminator(fake_lig.detach())
+            errD_fake = torch.mean(fake_output)
+            D_G_z1 = fake_output.mean().item()
+            gradient_penalty = calculate_gradient_penalty(self.discriminator,
+                                                          real_lig.data, fake_lig.data,
+                                                          device)
 
+            errD = -errD_real + errD_fake + gradient_penalty * 10
+            errD.backward()
             # nn.utils.clip_grad_value_(self.discriminator.parameters(), clip_value=1.0)
             self.discriminator_optimizer.step()
 
-            progress_bar.set_description(f"[{epoch + 1}/{epoch}][{step + 1}/{len(self.dataloader)}] ")
+            # -----------------
+            #  Train Generator
+            # -----------------
 
-            running_loss += discriminator_loss.item()
-            if step % 1000 == 0:
+            # if (step + 1) % self.n_critic == 0:
+            if (step + 1) % 1 == 0:
+
+                self.generator.zero_grad()
+                fake_lig = self.generator(noise)
+                fake_output = self.discriminator(fake_lig)
+                errG = -torch.mean(fake_output)
+                D_G_z2 = fake_output.mean().item()
+                errG.backward()
+                # nn.utils.clip_grad_value_(self.generator.parameters(), clip_value=1.0)
+                self.generator_optimizer.step()
+
+                logger.info(f"[{epoch + 1}/{epoch}][{step + 1}/{len(self.dataloader)}] "
+                                             f"Loss_D: {errD.item():.6f} Loss_G: {errG.item():.6f} "
+                                             f"D(x): {D_x:.6f} D(G(z)): {D_G_z1:.6f}/{D_G_z2:.6f}"
+                                             )
+
+            running_loss += errD.item()
+            if step % 1 == 0:
                 tb.add_scalar('Discriminator_Loss',
-                                  running_loss / 1000,
+                                  running_loss / 1,
                                   total_step)
 
             '''if total_step % 10 == 0:

@@ -10,14 +10,15 @@ from torch.utils.data import DataLoader
 from data.db_tools import SQL_Session
 from models.GAN.data_loader import get_loader
 from models.arch_utils import Architecture, get_model, get_config
+from utils import create_exp_folder
 
 cwd = Path().absolute()
-logging.basicConfig(filename=f"{cwd}/std.log",
-                    level=logging.INFO,
+logging.basicConfig(level=logging.INFO,
+                    filename=f'{cwd}/std.log',
                     format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
-                    datefmt="%d/%b/%Y %H:%M:%S",
                     filemode='w')
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
 
 
 cuda = True if torch.cuda.is_available() else False
@@ -31,9 +32,10 @@ class Experiment:
 
         self.model = get_model(model, model_conf['Hyperparameter'])
         self.dataset = dataset
+        self.exp_dir = create_exp_folder()
 
     def run(self):
-        self.model.fit(self.dataset)
+        self.model.fit(self.dataset, self.exp_dir)
         # images = self.model.test()
 
 

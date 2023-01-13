@@ -1,3 +1,5 @@
+from datetime import datetime
+from pathlib import Path
 from typing import List, Union
 
 import numpy as np
@@ -5,6 +7,16 @@ import tensorflow as tf
 import torch
 import torch.nn.functional as F
 from torch import nn
+
+
+def create_exp_folder():
+    cwd = Path().absolute()
+    now = datetime.now()
+    exp_id = now.strftime("%d-%m-%Y_%H-%M-%S")
+    folder = f'{cwd}/exp_{exp_id}'
+    p = Path(folder)
+    p.mkdir(parents=True, exist_ok=True)
+    return p
 
 
 def one_hot_enc(elem: Union[str, int, float, bool], permitted: List[str] = None) -> List[Union[int, float]]:
@@ -159,6 +171,7 @@ def find_val(in_T, out_T, in_C, out_C, side):
 
 
 def main():
+    # b, 3, 128, 81
     find_val(32, 1, 3, 3, 'right')
     # out = fast(torch.ones(5, 3, 120, 81))
     # print(out.shape)

@@ -1,2 +1,16 @@
-2023-01-13 01:54:23,403 New table for molecule records created.
-2023-01-13 01:54:52,520 New table for adj_mat created.
+[2023-01-13 03:16:56,776] INFO [__main__.main:55] Creating experiment for model GAN.
+[2023-01-13 03:16:56,776] INFO [data.molecular_matrix.get_smiles_dataset:207] Creating dataset from smiles format.
+[2023-01-13 03:16:56,857] INFO [data.molecular_matrix.get_smiles_dataset:217] 5 smiles have been loaded from path.
+[2023-01-13 03:16:56,974] INFO [data.db_tools.set_up_mol_table:128] New table for molecule records created.
+[2023-01-13 03:16:57,036] INFO [data.molecular_matrix.db_ingestion:175] Insertion into molecule records completed.
+[2023-01-13 03:16:57,094] INFO [data.db_tools.create_feat_tables:54] New table for adj_mat created.
+[2023-01-13 03:17:00,504] INFO [data.db_tools.create_feat_tables:54] New table for atom_feat created.
+[2023-01-13 03:17:02,991] INFO [data.db_tools.create_feat_tables:54] New table for bond_feat created.
+[2023-01-13 03:17:05,287] INFO [data.molecular_matrix.db_ingestion:181] Insertion into feature tables completed.
+[2023-01-13 03:17:05,288] INFO [numba.cuda.cudadrv.driver.ensure_initialized:246] init
+[2023-01-13 03:17:05,325] INFO [numba.cuda.cudadrv.driver.reset:1243] reset context of device 0
+[2023-01-13 03:17:06,439] INFO [models.GAN.GAN.fit:146] Start training:
+[2023-01-13 03:17:07,224] INFO [models.GAN.GAN.train:210] [1/0][1/1] Loss_D: 9.999771 Loss_G: -0.484465 D(x): 0.484901 D(G(z)): 0.484899/0.484465
+[2023-01-13 03:17:07,247] INFO [models.GAN.GAN.train:210] [2/1][1/1] Loss_D: 9.999619 Loss_G: -0.484013 D(x): 0.484469 D(G(z)): 0.484465/0.484013
+[2023-01-13 03:17:07,269] INFO [models.GAN.GAN.train:210] [3/2][1/1] Loss_D: 9.999445 Loss_G: -0.483462 D(x): 0.484019 D(G(z)): 0.484013/0.483462
+[2023-01-13 03:17:07,269] INFO [models.GAN.GAN.fit:151] Training finished.
