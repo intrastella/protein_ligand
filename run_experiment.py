@@ -48,6 +48,10 @@ class Experiment:
         self.model.fit(self.dataset, self.exp_dir)
         # images = self.model.evaluate()
 
+    @property
+    def best_ckpt(self):
+        pass
+
 
 def main(opt):
     model_conf = get_config(Architecture(opt.model))
