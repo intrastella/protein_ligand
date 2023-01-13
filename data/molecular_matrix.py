@@ -1,5 +1,6 @@
 import datetime
 import logging
+import sys
 from pathlib import Path
 from typing import List, Union
 import numpy as np
@@ -19,11 +20,10 @@ from utils import one_hot_enc, pad_tensor, pad_batch
 
 
 cwd = Path().absolute()
-logging.basicConfig(filename=f"{cwd}/std.log",
-                    format='%(asctime)s %(message)s',
-                    filemode='w')
+logging.basicConfig(level=logging.INFO,
+                    format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+                    datefmt="%d/%b/%Y %H:%M:%S")
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 class Smile2Mat:
@@ -102,8 +102,8 @@ class Smile2Mat:
         """
 
         data_list = []
-
-        for smile in smiles:
+        progress_bar = tqdm(enumerate(smiles), total=len(smiles))
+        for idx, smile in enumerate(smiles):
             self.mol = Chem.MolFromSmiles(smile)
 
             (n_nodes, n_edges, n_node_features, n_edge_features) = self.get_sizes()
@@ -115,6 +115,7 @@ class Smile2Mat:
 
             padded = pad_tensor([adj_mat, mol_nodes, mol_edges])
             data_list.append(padded)
+            progress_bar.set_description(f"[{idx} / {len(smiles)}] smiles data converted. ")
 
         dataset = pad_batch(data_list)
         if db_insertion:
@@ -181,7 +182,8 @@ class Smile2Mat:
         session.close()
 
     def create_connection(self, db_name: str):
-        log_data = yaml.safe_load(Path('data/data_conf.yaml').read_text())
+        cwd = Path().absolute()
+        log_data = yaml.safe_load(Path(f'{cwd}/data/data_conf.yaml').read_text())
         log_data['Credentials']['DATABASE'] = db_name
         return SQL_Session(**log_data['Credentials'])
 
@@ -208,7 +210,7 @@ class Smile2Mat:
                 dataset = LMDBDataset(self.path2mol)
                 if not self.smiles:
                     self.smiles = []
-                if not amount:
+                if not amount or (amount == 'None'):
                     amount = len(dataset)
                 for i in tqdm(range(amount)):
                     self.smiles.append(dataset[i]['smiles'])

@@ -1,5 +1,6 @@
 from typing import List, Union
 
+import numpy as np
 import tensorflow as tf
 import torch
 import torch.nn.functional as F
@@ -78,10 +79,7 @@ def df_to_tensor(df):
     return torch.from_numpy(df.values).float().to(device)
 
 
-
-
-
-def in_size(out_tensor: tuple, kernel: tuple, pad: tuple = (0, 0), dilation: tuple = (1, 1), stride: tuple = (1, 1)):
+def convTrans(out_tensor: tuple, kernel: tuple, pad: tuple = (0, 0), dilation: tuple = (1, 1), stride: tuple = (1, 1)):
     h = lambda x: stride[0] * (x - 1) - 2 * pad[0] + dilation[0] * (kernel[0] - 1) + 1
     w = lambda x: stride[1] * (x - 1) - 2 * pad[1] + dilation[1] * (kernel[1] - 1) + 1
 
@@ -91,34 +89,80 @@ def in_size(out_tensor: tuple, kernel: tuple, pad: tuple = (0, 0), dilation: tup
     return h_in, w_in
 
 
-def kernel_size(out_tensor: int, stride: int = 1, pad: int = 0, dilation: int = 1):
-    return 1 + (out_tensor * (1 - stride) + stride + 2 * pad - 1) / dilation
+def test(in_tensor: torch.Tensor, in_C=None, out_C=None, k=None, d=None, s=None) -> torch.Tensor:
+    res = fast(in_tensor, in_C, out_C, k, d, s)
+    return res
 
 
-def test():
-    size = in_size((124, 85), (5, 5), stride=(2, 2))
-    k = kernel_size(120)
+def fast(x, in_C=None, out_C=None, k=None, d=None, s=None):
+    t1 = nn.Conv2d(3, 3, (1, 4), dilation=(1, 6), stride=(1, 1))
+    t2 = nn.Conv2d(3, 3, (1, 4), dilation=(1, 1), stride=(1, 2))
+    m = nn.AvgPool2d((4, 4), padding=2, stride=1)
+    t = nn.Conv2d(in_C, out_C, (k, k), dilation=(d, d), stride=(s, s))
 
-    stride_size = lambda in_s, out_s, d, k: (in_s - 1 - d * (k - 1)) / (out_s - 1)
-    k_size = lambda in_s, d, s: 1 - ((- in_s + 1) / d)
+    x = t1(x)
+    x = m(x)
 
-    # torch.Size([4, 3, 120, 81])
-    # (3, 120, 81) - torch.Size([1, 12, 78, 61])
-    input1 = torch.zeros(1, 12, 78, 61)
-    m1 = nn.Conv2d(3, 12, (6, 5), dilation=(8, 5))
-    t1 = nn.ConvTranspose2d(12, 3, (6, 5), dilation=(8, 5))
+    x = t2(x)
+    x = m(x)
 
-    # (12, 100, 61) -> torch.Size([1, 24, 32, 28])
-    input2 = torch.zeros(1, 24, 32, 28)
-    m2 = nn.Conv2d(12, 24, (3, 3), stride=(2, 1), dilation=(6, 2))
-    t2 = nn.ConvTranspose2d(24, 12, (3, 3), stride=(2, 2), dilation=(6, 3))
+    x = t(x)
+    x = m(x)
+    return x
 
-    # (24, 32, 28) - (48, 12, 12)
-    input3 = torch.zeros(1, 48, 12, 12)
-    m3 = nn.Conv2d(24, 48, (4, 3), stride=(1, 1), dilation=(6, 2))
-    t3 = nn.ConvTranspose2d(24, 48, (4, 3), dilation=(6, 3))
 
-    # (48, 12, 12) - (96, 1, 1)
-    input3 = torch.zeros(1, 100, 1, 1)
-    m3 = nn.Conv2d(48, 100, (12, 12), dilation=(1, 1), stride=(12, 12))
-    t3 = nn.ConvTranspose2d(48, 100, (12, 12), dilation=(1, 1), stride=(12, 12))
+def stride_up_conv(in_T, out_T, k, d):
+    return ((out_T - 1) - d * (k - 1)) / (in_T - 1)
+
+
+def stride_conv(in_T, out_T, k, d):
+    if out_T == 1:
+        res = in_T - d * (k - 1)
+    else:
+        res = ((in_T - 1) - d * (k - 1)) / (out_T - 1)
+    return res
+
+
+def d_up_conv(in_T, out_T, k):
+    return int(((out_T - 1) - (in_T - 1)) / (k - 1))
+
+
+def d_conv(in_T, out_T, k):
+    return ((in_T - 1) - (out_T - 1)) / (k - 1)
+
+
+def find_val(in_T, out_T, in_C, out_C, side):
+    sides = {'left': 2, 'right': 3}
+    possible_parameters = []
+
+    for k in np.arange(2, 10, 1, dtype=int):
+        d_max = d_conv(in_T, out_T, k)
+        d_limit = min(d_max, 8)
+        for d in np.arange(1, d_limit + 1, 1, dtype=int):
+            s = stride_conv(in_T, out_T, k, d)
+            s = int(s)
+
+            res = test(torch.ones(5, 3, 81, 81), in_C, out_C, k, d, s)
+            txt = "SHAPE: {shape}, in_T: {in_T}, res: {res}, k: {k}, d:{d}, s:{s}".format(shape=res.shape, in_T=in_T,
+                                                                                          res=res.shape[sides[side]], k=k, d=d,
+                                                                                          s=s)
+            print(txt)
+
+            if out_T == res.shape[sides[side]]:
+                print(f' \n SOLUTION: {(k, d, s)}')
+                possible_parameters.append((k, d, s))
+
+    if len(possible_parameters) == 0:
+        print('No solution.')
+    else:
+        print(possible_parameters)
+
+
+def main():
+    find_val(32, 1, 3, 3, 'right')
+    # out = fast(torch.ones(5, 3, 120, 81))
+    # print(out.shape)
+
+
+if __name__ == '__main__':
+    main()

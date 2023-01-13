@@ -13,10 +13,11 @@ from models.arch_utils import Architecture, get_model, get_config
 
 cwd = Path().absolute()
 logging.basicConfig(filename=f"{cwd}/std.log",
-                    format='%(asctime)s %(message)s',
+                    level=logging.INFO,
+                    format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+                    datefmt="%d/%b/%Y %H:%M:%S",
                     filemode='w')
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 cuda = True if torch.cuda.is_available() else False
@@ -38,8 +39,8 @@ class Experiment:
 
 def main(opt):
     model_conf = get_config(Architecture(opt.model))
-
-    log_data = yaml.safe_load(Path('data/data_conf.yaml').read_text())
+    cwd = Path().absolute()
+    log_data = yaml.safe_load(Path(f'{cwd}/data/data_conf.yaml').read_text())
     log_data['Credentials']['DATABASE'] = model_conf['data']['db_name']
     session = SQL_Session(**log_data['Credentials'])
 
@@ -47,7 +48,7 @@ def main(opt):
         if not opt.path:
             mol_type = model_conf['data']['mol_type']
             db_name = model_conf['data']['db_name']
-            raise Exception(f"No {mol_type} found in {db_name} database and no path for data ingestion was given.")
+            raise Exception(f"No {mol_type} found in {db_name} database and no path for dataloader ingestion was given.")
 
     logger.info(f"Creating experiment for model {opt.model}.")
     mol_feat = get_loader(path2data=opt.path, **model_conf['data'])

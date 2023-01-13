@@ -18,5 +18,5 @@ setup(
     author_email="stellamuambangufulu@gmail.com",
     description="Ligand prediction repo for experimental purposes.",
     license="MIT License",
-    keywords="ligand prediction, data processing, library",
+    keywords="ligand prediction, dataloader processing, library",
     platforms="linux")
