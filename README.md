@@ -3,9 +3,11 @@ A repo for experimenting on creating ligands w/ ML.
 
 Architecture consits of GAN and Transformer model. Smiles data was used for ligands and sequencer for proteins. 
 
-**Database**: 
-1. ATOM3D - [zenodo.org](https://zenodo.org/record/4914718#.Y7_vRafMKV6)
-2. UniProt - [uniprot.org](https://www.uniprot.org/help/downloads#embeddings)
+**Databases**:
+
+1. BindingDB - [bindingdb.org](https://www.bindingdb.org/rwd/bind/chemsearch/marvin/Download.jsp) - [Discription](https://www.bindingdb.org/bind/chemsearch/marvin/BindingDB-SDfile-Specification.pdf)
+2. ATOM3D - [zenodo.org](https://zenodo.org/record/4914718#.Y7_vRafMKV6)
+3. UniProt - [uniprot.org](https://www.uniprot.org/help/downloads#embeddings)
 
 
 <h2> Organization </h2>

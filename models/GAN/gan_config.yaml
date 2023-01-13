@@ -2,7 +2,6 @@ model:
     name: "GAN"
 
 Hyperparameter:
-    latent_dim: 100
     batch_size: 60
     training_steps: 200
     n_epoch: 3

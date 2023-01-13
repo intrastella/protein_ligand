@@ -8,13 +8,27 @@ from tqdm import tqdm
 
 import torch
 from torch.utils.data import Dataset
-from atom3d.datasets import LMDBDataset
-
-from data.db_tools import SQL_Session
-from data.molecular_matrix import Smile2Mat
+from rdkit import Chem
+from rdkit.Chem import Draw
 
 
 logger = logging.getLogger(__name__)
+
+
+def save_mol_img(mol: str, name: str):
+    """
+
+    :param mol: smile format
+    :param name: name of mol
+    :return: png image saved in ./data/mol_imgs
+    """
+    cwd = Path().absolute()
+    folder = f'{cwd}/data/mol_imgs/{name}'
+    p = Path(folder)
+    p.mkdir(parents=True, exist_ok=True)
+
+    m = Chem.MolFromSmiles(mol)
+    Draw.MolToFile(m, p)
 
 
 class Prot_Lig_Dataset(Dataset):

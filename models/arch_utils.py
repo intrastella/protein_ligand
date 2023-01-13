@@ -1,4 +1,6 @@
 from typing import Dict
+
+import torch
 import yaml
 
 from enum import Enum
@@ -11,19 +13,25 @@ from models.Transformer.transformer import MultiHead, VAE
 class Architecture(Enum):
     TRANSFORMER = "Transformer"
     GAN = "GAN"
-    VAE = "VAE"
 
 
-def get_model(model_name: Architecture, model_conf: Dict):
+def get_model(model_name: Architecture, model_conf: Dict, weight_dir: Path = None):
     model = None
     if model_name == Architecture.GAN:
-        model = GAN(**model_conf)
-    elif model_name == Architecture.VAE:
-        model = VAE(**model_conf)
+        if not any(weight_dir.iterdir()):
+            model = GAN(**model_conf)
+            model.load_state_dict(torch.load(weight_dir))
+        else:
+            model = GAN(**model_conf)
+
     elif model_name == Architecture.TRANSFORMER:
         model = MultiHead(**model_conf)
 
     return model
+
+
+def best_ckpt():
+    pass
 
 
 def get_config(model: Architecture):
@@ -32,12 +40,7 @@ def get_config(model: Architecture):
     if model == Architecture.GAN:
         file = 'GAN/gan_config.yaml'
         conf = yaml.safe_load(Path(f'{cwd}/models/{file}').read_text())
-    elif model == Architecture.VAE:
-        file = None
-        conf = yaml.safe_load(Path('GAN/gan_config.yaml').read_text())
     elif model == Architecture.TRANSFORMER:
         file = None
         conf = yaml.safe_load(Path('GAN/gan_config.yaml').read_text())
     return conf
-
-Path().absolute()

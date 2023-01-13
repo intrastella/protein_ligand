@@ -13,9 +13,9 @@ import numpy as np
 import torch
 from torch import nn
 from torch.autograd import Variable
+from torch.hub import load_state_dict_from_url
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-import torchvision
 
 from models.model_utils import calculate_gradient_penalty
 
@@ -35,9 +35,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Generator(nn.Module):
 
-    def __init__(self, latent_dim):
+    def __init__(self):
         super(Generator, self).__init__()
-        self.latent_dim = latent_dim
         self.layers = []
 
         Hparameters = [(100, 48, 12, 12, 1, 1, 12, 12),
@@ -61,6 +60,13 @@ class Generator(nn.Module):
         feat = z.view(z.shape[0], self.latent_dim, 1, 1)
         feat = self.convT_blocks(feat)
         return feat
+
+    def _generator_weights(self, arch, pretrained, progress):
+        model = Generator()
+        if pretrained:
+            state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
+            model.load_state_dict(state_dict)
+        return model
 
 
 class Discriminator(nn.Module):
@@ -100,11 +106,17 @@ class Discriminator(nn.Module):
         mat = self.linear_block(mat)
         return mat
 
+    def _distcriminator_weights(self, arch, pretrained, progress):
+        model = Discriminator()
+        if pretrained:
+            state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
+            model.load_state_dict(state_dict)
+        return model
 
-class GAN:
+
+class GAN(nn.Module):
 
     def __init__(self,
-                 latent_dim: int = 100,
                  batch_size: int = 60,
                  training_steps: int = 200,
                  n_epoch: int = 5,
@@ -112,6 +124,7 @@ class GAN:
                  lr: float = 0.0002,
                  b1: float = 0.5,
                  b2: float = 0.999):
+        super(GAN, self).__init__()
 
         torch.cuda.empty_cache()
         cuda.select_device(0)
@@ -124,10 +137,9 @@ class GAN:
         self.training_steps = training_steps
         self.n_epoch = n_epoch
         self.n_critic = n_critic
-        self.latent_dim = latent_dim
 
         # Models
-        self.generator = Generator(latent_dim)
+        self.generator = Generator()
         self.discriminator = Discriminator()
 
         if cuda_C:
@@ -166,7 +178,7 @@ class GAN:
             valid = Variable(Tensor(mat.size(0), 1).fill_(1.0), requires_grad=False)
             fake = Variable(Tensor(mat.size(0), 1).fill_(0.0), requires_grad=False)
             real_lig = Variable(mat.type(Tensor))
-            noise = Variable(Tensor(np.random.normal(0, 1, (mat.shape[0], self.latent_dim))))
+            noise = Variable(Tensor(np.random.normal(0, 1, (mat.shape[0], 100))))
 
             # ---------------------
             #  Train Discriminator
@@ -225,12 +237,18 @@ class GAN:
                 gen_ROC = sklearn.metrics.roc_auc_score(discriminator_pred, generator_score)
                 dis_ROC = sklearn.metrics.roc_auc_score(true_val, discriminator_score)'''
 
+            gen_folder = f'{exp_dir}/weights/gen.pth'
+            dis_folder = f'{exp_dir}/weights/dis.pth'
+
+            torch.save(self.generator.state_dict(), gen_folder)
+            torch.save(self.discriminator.state_dict(), dis_folder)
+
     def evaluate(self):
         self.generator.eval()
         self.discriminator.eval()
 
         with torch.no_grad():
             Tensor = torch.cuda.FloatTensor if cuda_C else torch.FloatTensor
-            noise = Variable(Tensor(np.random.normal(0, 1, (self.batch_size, self.latent_dim))))
+            noise = Variable(Tensor(np.random.normal(0, 1, (self.batch_size, 100))))
             generated_data = self.generator(noise)
             return generated_data

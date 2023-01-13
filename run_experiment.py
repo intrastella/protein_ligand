@@ -28,15 +28,25 @@ class Experiment:
     def __init__(self,
                  model: Architecture,
                  model_conf: Dict,
-                 dataset: DataLoader):
+                 dataset: DataLoader,
+                 exp_id: str = None):
 
-        self.model = get_model(model, model_conf['Hyperparameter'])
         self.dataset = dataset
-        self.exp_dir = create_exp_folder()
+
+        if not exp_id:
+            self.exp_dir = create_exp_folder()
+
+        else:
+            self.exp_dir = Path(f'{cwd}/exp_id')
+
+        self.weight_dir = self.exp_dir / 'weights'
+        self.weight_dir.mkdir(parents=True, exist_ok=True)
+
+        self.model = get_model(model, model_conf['Hyperparameter'], self.weight_dir)
 
     def run(self):
         self.model.fit(self.dataset, self.exp_dir)
-        # images = self.model.test()
+        # images = self.model.evaluate()
 
 
 def main(opt):

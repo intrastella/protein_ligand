@@ -99,6 +99,9 @@ class SQL_Session:
         session.execute(stmt)
         session.commit()
 
+    def panda_in2_db(self, df, table_name):
+        df.to_sql(table_name, self.dbConnection, schema=None, if_exists='append')
+
     def get_record_count(self, db_name: str, table_name: str):
         Session = sessionmaker(bind=self.sqlEngine)
         session = Session()
