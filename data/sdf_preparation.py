@@ -1,39 +1,38 @@
+import re
 from pathlib import Path
 from typing import Union
 
 from rdkit.Chem import PandasTools
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
+from transformers import BertTokenizer
+from transformers import BertModel
 from transformers import BertTokenizer
 
-
 def get_tokens(file: Union[str, Path]):
-    # file = '/home/stella/Downloads/BindingDB_BindingDB_2D.sdf'
+    """
+    sdf file from BindingDB is used
+    """
+    
     df = PandasTools.LoadSDF(file, embedProps=True, molColName=None, smilesName='smiles')
+    
+    seuences = df['BindingDB Target Chain Sequence'].to_list()
+    max_len = max([len(list(seq.replace(' ', '')) for seq in sequences])
+    tensor_list = []
+    
+    tokenizer = BertTokenizer.from_pretrained("Rostlab/prot_bert", do_lower_case=False )
+    model = BertModel.from_pretrained("Rostlab/prot_bert")
+    
+    for seq in sequences:
+        sequence = re.sub(r"[UZOB]", "X", seq)
+        encoded_input = tokenizer(sequence, return_tensors='pt', padding=True, max_length=max_len)
+        tensor_list.append(model(**encoded_input))
+        
+    protein_dataset = torch.stack(tensor_list)
+    return protein_dataset
 
-    x = df['BindingDB Target Chain Sequence'].iloc[0]
-
-    tokenizer = Tokenizer(char_level=True)
-    tokenizer.fit_on_texts(x)
-    train_sequences = tokenizer.texts_to_sequences(x)
-    maxlen = max([len(x) for x in train_sequences])
-    train_padded = pad_sequences(train_sequences, maxlen=len(list(y)))
 
 
-    tz = BertTokenizer.from_pretrained("bert-base-cased")
-    sent = x
 
-    # Encode the sentence
-    encoded = tz.encode_plus(
-        text=sent,
-        add_special_tokens=True,
-        max_length=len(list(y)),
-        pad_to_max_length=True,
-        return_attention_mask=True,
-        return_tensors='pt',
-    )
 
-    input_ids = encoded['input_ids']
-    attn_mask = encoded['attention_mask']
+    
 
 
