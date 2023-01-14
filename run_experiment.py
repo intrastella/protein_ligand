@@ -1,3 +1,23 @@
+#!/usr/bin/env python3
+
+""" This module creates an instance of an experiment of a DL model.
+    So far it consits of a mixture of WGan and Transformer model.
+    You can specify checkpoints from prior trainings or chooses the best one.
+    
+    *** DATA ***
+    The data types for training and evalutation : smiles and sdf
+    You can choose to store the data in a sql database.
+    When executing that script it will as for your credentials from you sql databse.
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. """
+
+
 import argparse
 import logging
 from pathlib import Path
@@ -11,6 +31,18 @@ from data.db_tools import SQL_Session
 from models.GAN.data_loader import get_loader
 from models.arch_utils import Architecture, get_model, get_config
 from utils import create_exp_folder
+
+
+__author__ = "Stella Muamba Ngufulu"
+__contact__ = "stellamuambangufulu@gmail.com"
+__copyright__ = "Copyright 2023, protein ligand project"
+__date__ = "2023/01/13"
+__deprecated__ = False
+__license__ = "GPLv3"
+__maintainer__ = "developer"
+__status__ = "Dev"
+__version__ = "0.0.1"
+
 
 cwd = Path().absolute()
 logging.basicConfig(level=logging.INFO,
