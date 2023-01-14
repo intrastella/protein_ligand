@@ -99,41 +99,44 @@ class Experiment:
         pass
 
 
-def main(opt):
-    model_conf = get_config(Architecture(opt.model))
+def main(args):
+    model_conf = get_config(Architecture(args.model))
     cwd = Path().absolute()
     log_data = yaml.safe_load(Path(f'{cwd}/data/data_conf.yaml').read_text())
     log_data['Credentials']['DATABASE'] = model_conf['data']['db_name']
     session = SQL_Session(**log_data['Credentials'])
 
     if not session.df_exists('mol_rec'):
-        if not opt.path:
+        if not args.path:
             mol_type = model_conf['data']['mol_type']
             db_name = model_conf['data']['db_name']
             raise Exception(f"No {mol_type} found in {db_name} database and no path for dataloader ingestion was given.")
 
-    logger.info(f"Creating experiment for model {opt.model}.")
-    mol_feat = get_loader(path2data=opt.data_path, **model_conf['data'])
-    if not opt.best_ckpt:
-        exp = Experiment(Architecture(opt.model), model_conf, mol_feat, ckpt_path=opt.ckpt_path, best_ckpt=False)
+    logger.info(f"Creating experiment for model {args.model}.")
+    mol_feat = get_loader(path2data=opt.data_path, **model_conf['data'], db_insertion=db_insertion)
+    if not args.best_ckpt:
+        exp = Experiment(Architecture(opt.model), model_conf, mol_feat, ckpt_path=args.ckpt_path, best_ckpt=args.best_ckpt)
     else:
         exp = Experiment(Architecture(opt.model), model_conf, mol_feat)
     exp.run()
 
 
 if __name__ == '__main__':
-    USER: 'root'
-    PASSWORD:
-  HOST: '127.0.0.1'
-  PORT: 3306
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", help="Name of model.", required=True)
     parser.add_argument("--data_path", help="Path of dataset.")
+    parser.add_argument("-sql", "--sql_info", dest='SQL', action='store_true')
+    parser.add_argument("-ho", "--host", dest='HOST', help="Host for sql API.")
+    parser.add_argument("-po", "--port", dest='PORT', help="Port for sql API.")
+    parser.add_argument("-db", "--database", dest='db_name', help="Database name to use.")
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--ckpt_path", help="Path of checkpoint.")
-    group.add_argument("--best_ckpt", action='store_true', help="Use best trained model version.")
+    group.add_argument("--best_ckpt", action='store_false', help="Use best trained model version.")
 
+    args = parser.parse_args()
+    if args.SQL and not (args.HOST and args.PORT and args.database):
+        parser.error('Please specify [-ho HOST], [-po PORT] and [-db DATABASE].')
     # parsed_args = parser.parse_args()
     # args = vars(parsed_args)
-    main(parser.parse_args())
+    main(args)
