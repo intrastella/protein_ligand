@@ -13,7 +13,7 @@ def create_exp_folder():
     cwd = Path().absolute()
     now = datetime.now()
     exp_id = now.strftime("%d-%m-%Y_%H-%M-%S")
-    folder = f'{cwd}/exp_{exp_id}'
+    folder = cwd / f'experiments/{exp_id}'
     p = Path(folder)
     p.mkdir(parents=True, exist_ok=True)
     return p
