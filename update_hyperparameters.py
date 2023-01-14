@@ -35,6 +35,10 @@ logger.addHandler(logging.StreamHandler())
 
 
 def main(args):
+    """
+    Not implemented.
+    """
+
     cwd = Path().absolute()
     params = yaml.safe_load(Path(f'{cwd}/model/GAN/GAN/gan_config.yaml').read_text())
 
