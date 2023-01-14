@@ -168,11 +168,6 @@ class GAN(nn.Module):
         for step, mat in tqdm(enumerate(self.dataloader)):
             total_step = len(self.dataloader) * epoch + step
 
-            folder = f'{exp_dir}/runs'
-            p = pathlib.Path(folder)
-            p.mkdir(parents=True, exist_ok=True)
-            tb = SummaryWriter(folder)
-
             Tensor = torch.cuda.FloatTensor if cuda_C else torch.FloatTensor
 
             valid = Variable(Tensor(mat.size(0), 1).fill_(1.0), requires_grad=False)
@@ -222,6 +217,11 @@ class GAN(nn.Module):
                                              f"Loss_D: {errD.item():.6f} Loss_G: {errG.item():.6f} "
                                              f"D(x): {D_x:.6f} D(G(z)): {D_G_z1:.6f}/{D_G_z2:.6f}"
                                              )
+                                        
+            folder = f'{exp_dir}/runs'
+            p = pathlib.Path(folder)
+            p.mkdir(parents=True, exist_ok=True)
+            tb = SummaryWriter(folder)
 
             running_loss += errD.item()
             if (step+1) % 1000 == 0:
