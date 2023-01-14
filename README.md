@@ -18,7 +18,7 @@ You can execute a run via `./run_experiment.py` and see metrics and results via 
 > 2. After a run write in command line:
 `tensorboard --logdir [path to runs folder]` and open the link provided to see results.
 
-Your SQL credentials needs to be saved in `./data/data_conf.yaml.py` :
+Your SQL credentials will be asked when executing an experiment and you want to save your dataset :
 
 > USER: <br>
 > PASSWORD: <br>
