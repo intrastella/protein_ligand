@@ -1,21 +1,29 @@
 #!/usr/bin/env python3
 
-""" This module creates an instance of an experiment of a DL model.
+""" 
+    ----------------------------- *** DESCRIPTION *** ----------------------------
+    This module creates an instance of an experiment of a DL model.
     So far it consits of a mixture of WGan and Transformer model.
     You can specify checkpoints from prior trainings or chooses the best one.
+    ------------------------------------------------------------------------------
     
-    *** DATA ***
+    -------------------------------- *** DATA *** --------------------------------
     The data types for training and evalutation : smiles and sdf
     You can choose to store the data in a sql database.
-    When executing that script it will as for your credentials from you sql databse.
+    When executing this script it will ask for your credentials from you sql databse.
+    ------------------------------------------------------------------------------
 
+
+-------------------------------- *** LISCENCE *** --------------------------------
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, either version 3 of the License, or (at your option) any later
 version.
 This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. """
+FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details. 
+-----------------------------------------------------------------------------------
+"""
 
 
 import argparse
