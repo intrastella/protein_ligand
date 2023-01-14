@@ -18,6 +18,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from models.model_utils import calculate_gradient_penalty
+from utils import get_device
 
 
 cwd = Path().absolute()
@@ -30,7 +31,7 @@ logger.addHandler(logging.StreamHandler())
 
 
 cuda_C = True if torch.cuda.is_available() else False
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = get_device()
 
 
 class Generator(nn.Module):
