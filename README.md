@@ -15,16 +15,14 @@ Architecture consits of GAN and Transformer model. Smiles data was used for liga
 You can execute a run via `./run_experiment.py` and see metrics and results via Tensorboard by running:
 
 > 1. Model will be required and path to dataset if you haven't stored them in a sql table from a previous experiment with this model:  `--model [model name] --data_path [dataset path]` <br>
-> 2. After a run write in command line:
+> 2. If it's your first experiment w/ this model you can save the given dataset in a table so they won't need to be processed again for another experiment by additionally writing `-sql [-ho HOST] [-po PORT] [-db DATABASE]` in command line.
+> 3. After a run write in command line:
 `tensorboard --logdir [path to runs folder]` and open the link provided to see results.
 
 Your SQL credentials will be asked when executing an experiment and you want to save your dataset :
 
 > USER: <br>
 > PASSWORD: <br>
-> HOST: <br>
-> PORT: <br>
-> DATABSE
 
 <h2> Goals </h2>
 Create a proper structure for my own DL project.
