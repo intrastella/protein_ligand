@@ -132,7 +132,7 @@ if __name__ == '__main__':
     parser.add_argument("--ckpt_path", help="Path of checkpoint.")
 
     args = parser.parse_args()
-    if args.SQL and not (args.HOST and args.PORT and args.db_name):
+    if not (args.HOST or args.PORT or args.db_name):
         parser.error('Please specify [-ho HOST], [-po PORT] and [-db DATABASE].')
     # parsed_args = parser.parse_args()
     # args = vars(parsed_args)
