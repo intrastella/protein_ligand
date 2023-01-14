@@ -21,9 +21,6 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 
 
-cuda = True if torch.cuda.is_available() else False
-
-
 class Experiment:
     def __init__(self,
                  model: Architecture,
