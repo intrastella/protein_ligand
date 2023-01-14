@@ -128,11 +128,6 @@ class GAN(nn.Module):
                  ckpt_path: Union[str, Path] = None):
         super(GAN, self).__init__()
 
-        torch.cuda.empty_cache()
-        cuda.select_device(0)
-        cuda.close()
-        cuda.select_device(0)
-
         self.dataloader = None
 
         self.batch_size = batch_size
@@ -143,15 +138,12 @@ class GAN(nn.Module):
         self.b1 = b1
         self.b2 = b2
 
-        # Models
         self.generator = None
         self.discriminator = None
-        self.load_from_model_ckpt()
+        self.generator_optimizer = None
+        self.discriminator_optimizer = None
 
-        # Optimizers
-        self.load_
-
-    def load_from_model_ckpt():
+    def _init_model():
         self.generator = Generator()
         self.discriminator = Discriminator()
 
@@ -165,14 +157,17 @@ class GAN(nn.Module):
             self.generator.cuda()
             self.discriminator.cuda()
 
-        def def load_from_optimizer_ckpt():
-            if ckpt_path:
+    def _init_optimizer():
+        if ckpt_path:
              self.generator_optimizer.load_state_dict(gen_checkpoint['optimizer_state_dict'])
              self.discriminator_optimizer.load_state_dict(dis_checkpoint['optimizer_state_dict'])
         else:
             self.generator_optimizer = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
             self.discriminator_optimizer = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
-        
+
+    def setup():
+        self._init_model()
+        self._init_optimizer()
 
     def fit(self, data: DataLoader, exp_dir: Path):
         self.dataloader = data
