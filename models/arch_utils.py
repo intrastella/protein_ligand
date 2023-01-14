@@ -54,10 +54,6 @@ def get_model(model_name: Architecture, model_conf: Dict, ckpt_dir: Union[List[P
     return model
 
 
-def best_ckpt():
-    pass
-
-
 def get_config(model: Architecture):
     conf = None
     cwd = Path().absolute()
