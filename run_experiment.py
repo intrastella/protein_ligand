@@ -122,6 +122,10 @@ def main(opt):
 
 
 if __name__ == '__main__':
+    USER: 'root'
+    PASSWORD:
+  HOST: '127.0.0.1'
+  PORT: 3306
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", help="Name of model.", required=True)
     parser.add_argument("--data_path", help="Path of dataset.")
