@@ -10,6 +10,9 @@ import torch.nn.functional as F
 from torch import nn
 
 
+
+
+
 def create_exp_folder() -> Path:
     cwd = Path().absolute()
     now = datetime.now()
@@ -18,6 +21,18 @@ def create_exp_folder() -> Path:
     p = Path(folder)
     p.mkdir(parents=True, exist_ok=True)
     return p
+    
+    
+def get_config(model: Architecture):
+    conf = None
+    cwd = Path().absolute()
+    if model == Architecture.GAN:
+        file = 'GAN/gan_config.yaml'
+        conf = yaml.safe_load(Path(f'{cwd}/models/{file}').read_text())
+    elif model == Architecture.TRANSFORMER:
+        file = None
+        conf = yaml.safe_load(Path('GAN/gan_config.yaml').read_text())
+    return conf
     
     
 def update_conf(conf: Dict, new_vals: Dict, file_path: Path, section: str):
