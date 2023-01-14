@@ -15,12 +15,20 @@ class Architecture(Enum):
     GAN = "GAN"
 
 
-def get_model(model_name: Architecture, model_conf: Dict, weight_dir: Path = None):
+def get_model(model_name: Architecture, model_conf: Dict, ckpt_dir: Union[List[Path], Path] = None):
     model = None
     if model_name == Architecture.GAN:
         if not any(weight_dir.iterdir()):
+            if not isinstance(ckpt_dir, list):
+                raise ValueError('More than 1 checkpoints must be given in a list.')
+            if len(ckpt_dir) != 2:
+                raise ValueError(f'1 checkpoint for genererator and 1 for discriminator is required. {len(ckpt_dir)} were given.')
+            
+            checkpoint = torch.load(ckpt_dir[0])
+            epoch = checkpoint['epoch']
+            
             model = GAN(**model_conf)
-            model.load_state_dict(torch.load(weight_dir))
+            
         else:
             model = GAN(**model_conf)
 
