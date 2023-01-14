@@ -39,6 +39,9 @@ class Experiment:
         else:
             self.exp_dir = Path(f'{cwd}/exp_id')
 
+        self.ckpt_dir = self.exp_dir / 'model_ckpts'
+        self.ckpt_dir.mkdir(parents=True, exist_ok=True)
+
         self.weight_dir = self.exp_dir / 'weights'
         self.weight_dir.mkdir(parents=True, exist_ok=True)
 
