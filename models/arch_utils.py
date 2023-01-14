@@ -24,10 +24,17 @@ def get_model(model_name: Architecture, model_conf: Dict, ckpt_dir: Union[List[P
             if len(ckpt_dir) != 2:
                 raise ValueError(f'1 checkpoint for genererator and 1 for discriminator is required. {len(ckpt_dir)} were given.')
             
+            model_dict = {}
             checkpoint = torch.load(ckpt_dir[0])
-            epoch = checkpoint['epoch']
+            model_dict[batch_size] = checkpoint['batch_size']
+            model_dict[training_steps] = checkpoint['training_steps']
+            model_dict[n_epoch] = checkpoint['n_epoch']
+            model_dict[n_critic] = checkpoint['n_critic']
+            model_dict[lr] = checkpoint['lr']
+            model_dict[b1] = checkpoint['b1']
+            model_dict[b2] = checkpoint['b2']
             
-            model = GAN(**model_conf)
+            model = GAN(**model_dict)
             
         else:
             model = GAN(**model_conf)
