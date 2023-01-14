@@ -24,7 +24,7 @@ class Architecture(Enum):
     GAN = "GAN"
 
 
-def get_model(model_name: Architecture, model_conf: Dict, ckpt_path: Union[List[Union[str, Path]], Union[str, Path]] = None):
+def get_model(model_name: Architecture, model_conf: Dict, ckpt_path: Union[str, List[str]]= None):
     model = None
     if model_name == Architecture.GAN:
         if ckpt_path:
