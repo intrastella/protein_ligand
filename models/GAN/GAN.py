@@ -62,13 +62,6 @@ class Generator(nn.Module):
         feat = self.convT_blocks(feat)
         return feat
 
-    def _generator_weights(self, arch, pretrained, progress):
-        model = Generator()
-        if pretrained:
-            state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
-            model.load_state_dict(state_dict)
-        return model
-
 
 class Discriminator(nn.Module):
 
@@ -106,13 +99,6 @@ class Discriminator(nn.Module):
         mat = mat.view(mat.size(0), np.prod(mat.shape[1:]))
         mat = self.linear_block(mat)
         return mat
-
-    def _distcriminator_weights(self, arch, pretrained, progress):
-        model = Discriminator()
-        if pretrained:
-            state_dict = load_state_dict_from_url(model_urls[arch], progress=progress)
-            model.load_state_dict(state_dict)
-        return model
 
 
 class GAN(nn.Module):
