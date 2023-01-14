@@ -273,18 +273,18 @@ class GAN(nn.Module):
         'loss': errG,
          }, gen_file)
 
-         torch.save({
-         'batch_size': self.batch_size,
-         'training_steps': self.training_steps,
-         'n_epoch': self.n_epoch,
-         'n_critic': self.n_critic,
-         'lr': self.lr,
-         'b1': self.b1,
-         'b2': self.b2,
-         'model_state_dict': self.discriminator.state_dict(),
-         'optimizer_state_dict': self.discriminator_optimizer.state_dict(),
-         'loss': errD,
-          }, dis_file)
+        torch.save({
+        'batch_size': self.batch_size,
+        'training_steps': self.training_steps,
+        'n_epoch': self.n_epoch,
+        'n_critic': self.n_critic,
+        'lr': self.lr,
+        'b1': self.b1,
+        'b2': self.b2,
+        'model_state_dict': self.discriminator.state_dict(),
+        'optimizer_state_dict': self.discriminator_optimizer.state_dict(),
+        'loss': errD,
+         }, dis_file)
 
     def evaluate(self):
         self.generator.eval()
