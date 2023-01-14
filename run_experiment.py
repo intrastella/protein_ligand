@@ -39,7 +39,7 @@ from torch.utils.data import DataLoader
 from data.db_tools import SQL_Session
 from models.GAN.data_loader import get_loader
 from models.arch_utils import Architecture, get_model, get_config
-from utils import create_exp_folder
+from utils import create_exp_folder, update_conf
 
 
 __author__ = "Stella Muamba Ngufulu"
@@ -104,7 +104,15 @@ def main(args):
     if args.SQL:
         
         if args.data_path:
+            # get user and password w/ bypass
             mol_feat = get_loader(path2data=opt.data_path, **model_conf['data'], db_insertion=True)
+            update_cred = {
+                'USER': 
+                'PASSWORD':
+                'HOST': args.HOST
+                'PORT': args.PORT}
+                
+            update_conf(model_conf, update_cred, section=['Credentials'])
             
         else:
             # just sql
