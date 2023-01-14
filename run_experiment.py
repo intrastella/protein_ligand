@@ -101,6 +101,20 @@ class Experiment:
 
 def main(args):
     model_conf = get_config(Architecture(args.model))
+    if args.SQL:
+        
+        if args.data_path:
+            mol_feat = get_loader(path2data=opt.data_path, **model_conf['data'], db_insertion=True)
+            
+        else:
+            # just sql
+            
+    else:
+        # model and path
+        pass
+        
+        
+    model_conf = get_config(Architecture(args.model))
     cwd = Path().absolute()
     log_data = yaml.safe_load(Path(f'{cwd}/data/data_conf.yaml').read_text())
     log_data['Credentials']['DATABASE'] = model_conf['data']['db_name']
@@ -132,8 +146,10 @@ if __name__ == '__main__':
     parser.add_argument("--ckpt_path", help="Path of checkpoint.")
 
     args = parser.parse_args()
-    if not (args.HOST or args.PORT or args.db_name):
-        parser.error('Please specify [-ho HOST], [-po PORT] and [-db DATABASE].')
+    
+    if args.data_path and args.SQL:
+        if not (args.HOST or args.PORT or args.db_name):
+            parser.error('Please specify [-ho HOST], [-po PORT] and [-db DATABASE].')
     # parsed_args = parser.parse_args()
     # args = vars(parsed_args)
     main(args)
