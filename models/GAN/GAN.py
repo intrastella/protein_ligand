@@ -144,25 +144,35 @@ class GAN(nn.Module):
         self.b2 = b2
 
         # Models
+        self.generator = None
+        self.discriminator = None
+        self.load_from_model_ckpt()
+
+        # Optimizers
+        self.load_
+
+    def load_from_model_ckpt():
         self.generator = Generator()
         self.discriminator = Discriminator()
 
         if ckpt_path:
-            checkpoint = torch.load(ckpt_path)
-            self.generator.load_state_dict(checkpoint['model_state_dict'])
-            self.discriminator.load_state_dict(checkpoint['model_state_dict'])
+            gen_checkpoint = torch.load(ckpt_path[0])
+            dis_checkpoint = torch.load(ckpt_path[1])
+            self.generator.load_state_dict(gen_checkpoint['model_state_dict'])
+            self.discriminator.load_state_dict(did_checkpoint['model_state_dict'])
 
         if cuda_C:
             self.generator.cuda()
             self.discriminator.cuda()
 
-        # Optimizers
-        if ckpt_path:
-             self.generator_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-             self.discriminator_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        def def load_from_optimizer_ckpt():
+            if ckpt_path:
+             self.generator_optimizer.load_state_dict(gen_checkpoint['optimizer_state_dict'])
+             self.discriminator_optimizer.load_state_dict(dis_checkpoint['optimizer_state_dict'])
         else:
             self.generator_optimizer = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
             self.discriminator_optimizer = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
+        
 
     def fit(self, data: DataLoader, exp_dir: Path):
         self.dataloader = data
