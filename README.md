@@ -1,5 +1,5 @@
 # Ligand - Protein 
-A repo for experimenting on creating ligands w/ ML.
+A repo for experimenting on creating ligands w/ high binding affinity using ML.
 
 Architecture consits of GAN and Transformer model. Smiles data was used for ligands and sequencer for proteins. 
 
