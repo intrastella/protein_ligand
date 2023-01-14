@@ -20,9 +20,9 @@ def create_exp_folder() -> Path:
     return p
     
     
-def update_conf(conf: Dict, new_vals: Dict, file_path: Union[Path, str]):
+def update_conf(conf: Dict, new_vals: Dict, file_path: Path, section: str):
     for key in new_vals.keys:
-        conf[key] = new_vals[key]
+        conf[section][key] = new_vals[key]
     
     with open(file_path, 'w') as f:
         yaml.dump(doc, f)
