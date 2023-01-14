@@ -10,6 +10,15 @@ from models.GAN.GAN import GAN
 from models.Transformer.transformer import MultiHead, VAE
 
 
+cwd = Path().absolute()
+logging.basicConfig(level=logging.INFO,
+                    filename=f'{cwd}/std.log',
+                    format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+                    filemode='w')
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+
+
 class Architecture(Enum):
     TRANSFORMER = "Transformer"
     GAN = "GAN"
