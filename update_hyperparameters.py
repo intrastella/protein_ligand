@@ -35,10 +35,8 @@ logger.addHandler(logging.StreamHandler())
 
 
 def main(args):
-    model_conf = get_config(Architecture(args.model))
     cwd = Path().absolute()
-    log_data = yaml.safe_load(Path(f'{cwd}/data/data_conf.yaml').read_text())
-    log_data['Credentials']['DATABASE'] = model_conf['data']['db_name']
+    params = yaml.safe_load(Path(f'{cwd}/model/GAN/GAN/gan_config.yaml').read_text())
 
 
 if __name__ == '__main__':
