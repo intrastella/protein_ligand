@@ -18,7 +18,7 @@ class Architecture(Enum):
 def get_model(model_name: Architecture, model_conf: Dict, ckpt_dir: Union[List[Path], Path] = None):
     model = None
     if model_name == Architecture.GAN:
-        if not any(ckpt_dir.iterdir()):
+        if ckpt_dir:
             if not isinstance(ckpt_dir, list):
                 raise ValueError('More than 1 checkpoints must be given in a list.')
             if len(ckpt_dir) != 2:
