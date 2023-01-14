@@ -125,7 +125,7 @@ class GAN(nn.Module):
                  lr: float,
                  b1: float,
                  b2: float,
-                 ckpt_path: Union[str, Path] = None):
+                 ckpt_path: List[Union[str, Path]] = None):
         super(GAN, self).__init__()
 
         self.dataloader = None
