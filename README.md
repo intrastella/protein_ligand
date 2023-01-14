@@ -14,7 +14,7 @@ Architecture consits of GAN and Transformer model. Smiles data was used for liga
 
 You can execute a run via `./run_experiment.py` and see metrics and results via Tensorboard by running:
 
-> 1. Model and path to dataset will be required:  `--model [model name] --path [dataset path]` <br>
+> 1. Model will be required and path to dataset if you haven't stored them in a sql table from a previous experiment with this model:  `--model [model name] --data_path [dataset path]` <br>
 > 2. After a run write in command line:
 `tensorboard --logdir [path to runs folder]` and open the link provided to see results.
 
