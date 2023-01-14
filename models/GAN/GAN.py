@@ -237,9 +237,8 @@ class GAN(nn.Module):
                                              f"D(x): {D_x:.6f} D(G(z)): {D_G_z1:.6f}/{D_G_z2:.6f}"
                                              )
                                         
-            folder = f'{exp_dir}/runs'
-            p = pathlib.Path(folder)
-            p.mkdir(parents=True, exist_ok=True)
+            folder = exp_dir / 'runs'
+            folder.mkdir(parents=True, exist_ok=True)
             tb = SummaryWriter(folder)
 
             running_loss += errD.item()
@@ -258,8 +257,8 @@ class GAN(nn.Module):
         self.save_ckpt(errG.item(), errD.item())
 
     def save_ckpt(self, errG, errD):
-        gen_file = f'{exp_dir}/weights/gen.pth'
-        dis_file = f'{exp_dir}/weights/dis.pth'
+        gen_file = exp_dir / 'model_ckpts/gen.pth'
+        dis_file = exp_dir / 'model_ckpts/dis.pth'
 
         torch.save({
         'batch_size': self.batch_size,
