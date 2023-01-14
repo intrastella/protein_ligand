@@ -28,7 +28,7 @@ class Experiment:
                  dataset: DataLoader,
                  exp_id: str = None, 
                  ckpt_path: str = None,
-                 best_ckpt = True):
+                 best_ckpt: bool = True):
 
         self.dataset = dataset
 
@@ -43,10 +43,8 @@ class Experiment:
 
         self.ckpt_dir = self.exp_dir / 'model_ckpts'
         self.ckpt_dir.mkdir(parents=True, exist_ok=True)
-
-        self.ckpt_path = ckpt_path
-
-        self.model = get_model(model, model_conf['Hyperparameter'], self.ckpt_path)
+        
+        self.model = get_model(model, model_conf['Hyperparameter'], ckpt_path, best_ckpt)
 
     def run(self):
         self.model.fit(self.dataset, self.exp_dir)
@@ -72,7 +70,7 @@ def main(opt):
 
     logger.info(f"Creating experiment for model {opt.model}.")
     mol_feat = get_loader(path2data=opt.data_path, **model_conf['data'])
-    if opt.ckpt_path:
+    if not opt.best_ckpt:
         exp = Experiment(Architecture(opt.model), model_conf, mol_feat, ckpt_path=opt.ckpt_path, best_ckpt=False)
     else:
         exp = Experiment(Architecture(opt.model), model_conf, mol_feat)
@@ -86,6 +84,6 @@ if __name__ == '__main__':
 
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--ckpt_path", help="Path of checkpoint.")
-    group.add_argument("--best_ckpt", action='store_false', help="Use best trained model version.")
+    group.add_argument("--best_ckpt", action='store_true', help="Use best trained model version.")
 
     main(parser.parse_args())
