@@ -117,13 +117,14 @@ class Discriminator(nn.Module):
 class GAN(nn.Module):
 
     def __init__(self,
-                 batch_size: int = 60,
-                 training_steps: int = 200,
-                 n_epoch: int = 5,
-                 n_critic: int = 5,
-                 lr: float = 0.0002,
-                 b1: float = 0.5,
-                 b2: float = 0.999):
+                 batch_size: int,
+                 training_steps: int,
+                 n_epoch: int,
+                 n_critic: int,
+                 lr: float,
+                 b1: float,
+                 b2: float,
+                 ckpt_path):
         super(GAN, self).__init__()
 
         torch.cuda.empty_cache()
@@ -137,18 +138,30 @@ class GAN(nn.Module):
         self.training_steps = training_steps
         self.n_epoch = n_epoch
         self.n_critic = n_critic
+        self.lr = lr
+        self.b1 = b1
+        self.b2 = b2
 
         # Models
         self.generator = Generator()
         self.discriminator = Discriminator()
+
+        if ckpt_path:
+            checkpoint = torch.load(ckpt_path)
+            self.generator.load_state_dict(checkpoint['model_state_dict'])
+            self.discriminator.load_state_dict(checkpoint['model_state_dict'])
 
         if cuda_C:
             self.generator.cuda()
             self.discriminator.cuda()
 
         # Optimizers
-        self.generator_optimizer = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
-        self.discriminator_optimizer = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
+        if ckpt_path:
+             self.generator_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+             self.discriminator_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        else:
+            self.generator_optimizer = torch.optim.Adam(self.generator.parameters(), lr=lr, betas=(b1, b2))
+            self.discriminator_optimizer = torch.optim.Adam(self.discriminator.parameters(), lr=lr, betas=(b1, b2))
 
     def fit(self, data: DataLoader, exp_dir: Path):
         self.dataloader = data
@@ -243,16 +256,26 @@ class GAN(nn.Module):
         dis_file = f'{exp_dir}/weights/dis.pth'
 
         torch.save({
-        'epoch': self.n_epoch,
-        'critic': self.n_critic,
+        'batch_size': self.batch_size,
+        'training_steps': self.training_steps,
+        'n_epoch': self.n_epoch,
+        'n_critic': self.n_critic,
+        'lr': self.lr,
+        'b1': self.b1,
+        'b2': self.b2,
         'model_state_dict': self.generator.state_dict(),
         'optimizer_state_dict': self.generator_optimizer.state_dict(),
         'loss': errG,
          }, gen_file)
 
          torch.save({
-         'epoch': self.n_epoch, 
-         'critic': self.n_critic,
+         'batch_size': self.batch_size,
+         'training_steps': self.training_steps,
+         'n_epoch': self.n_epoch,
+         'n_critic': self.n_critic,
+         'lr': self.lr,
+         'b1': self.b1,
+         'b2': self.b2,
          'model_state_dict': self.discriminator.state_dict(),
          'optimizer_state_dict': self.discriminator_optimizer.state_dict(),
          'loss': errD,
