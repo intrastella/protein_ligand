@@ -29,7 +29,8 @@ class Experiment:
                  model: Architecture,
                  model_conf: Dict,
                  dataset: DataLoader,
-                 exp_id: str = None):
+                 exp_id: str = None, 
+                 best_ckpt = True):
 
         self.dataset = dataset
 
@@ -39,17 +40,19 @@ class Experiment:
         else:
             self.exp_dir = Path(f'{cwd}/exp_id')
 
-        self.ckpt_dir = self.exp_dir / 'model_ckpts'
-        self.ckpt_dir.mkdir(parents=True, exist_ok=True)
-
         self.weight_dir = self.exp_dir / 'weights'
         self.weight_dir.mkdir(parents=True, exist_ok=True)
 
-        self.model = get_model(model, model_conf['Hyperparameter'], self.weight_dir)
+        self.ckpt_dir = self.exp_dir / 'model_ckpts'
+        self.ckpt_dir.mkdir(parents=True, exist_ok=True)
+
+        self.ckpt_path = None
+
+        self.model = get_model(model, model_conf['Hyperparameter'], self.ckpt_path)
 
     def run(self):
         self.model.fit(self.dataset, self.exp_dir)
-        # images = self.model.evaluate()
+        # self.model.evaluate()
 
     @property
     def best_ckpt(self):
@@ -79,6 +82,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", help="Name of model.", required=True)
     parser.add_argument("--path", help="Path of dataset.")
-    # group = parser.add_mutually_exclusive_group()
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--ckpt", help="Path of checkpoint.")
+    group.add_argument("--best_ckpt", action='store_false', help="Use best trained model version.")
 
     main(parser.parse_args())
