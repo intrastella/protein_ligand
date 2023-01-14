@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 from pathlib import Path
 from typing import List, Union, Dict
 
@@ -10,7 +11,10 @@ import torch.nn.functional as F
 from torch import nn
 
 
-
+class FileLocation(Enum):
+    DataConfig = Path('data/data_conf.yaml')
+    GANConfig = Path('models/GAN/GAN/gan_config.yaml')
+    TransformerConfig = Path('models/Transformer/Transformer/gan_config.yaml')
 
 
 def create_exp_folder() -> Path:
