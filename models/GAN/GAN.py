@@ -207,8 +207,7 @@ class GAN(nn.Module):
             #  Train Generator
             # -----------------
 
-            # if (step + 1) % self.n_critic == 0:
-            if (step + 1) % 1 == 0:
+            if (step + 1) % self.n_critic == 0:
 
                 self.generator.zero_grad()
                 fake_lig = self.generator(noise)
@@ -225,7 +224,7 @@ class GAN(nn.Module):
                                              )
 
             running_loss += errD.item()
-            if step % 1 == 0:
+            if (step+1) % 1000 == 0:
                 tb.add_scalar('Discriminator_Loss',
                                   running_loss / 1,
                                   total_step)
@@ -237,11 +236,27 @@ class GAN(nn.Module):
                 gen_ROC = sklearn.metrics.roc_auc_score(discriminator_pred, generator_score)
                 dis_ROC = sklearn.metrics.roc_auc_score(true_val, discriminator_score)'''
 
-            gen_folder = f'{exp_dir}/weights/gen.pth'
-            dis_folder = f'{exp_dir}/weights/dis.pth'
+        self.save_ckpt(errG.item(), errD.item())
 
-            torch.save(self.generator.state_dict(), gen_folder)
-            torch.save(self.discriminator.state_dict(), dis_folder)
+    def save_ckpt(self, errG, errD):
+        gen_file = f'{exp_dir}/weights/gen.pth'
+        dis_file = f'{exp_dir}/weights/dis.pth'
+
+        torch.save({
+        'epoch': self.n_epoch,
+        'critic': self.n_critic,
+        'model_state_dict': self.generator.state_dict(),
+        'optimizer_state_dict': self.generator_optimizer.state_dict(),
+        'loss': errG,
+         }, gen_file)
+
+         torch.save({
+         'epoch': self.n_epoch, 
+         'critic': self.n_critic,
+         'model_state_dict': self.discriminator.state_dict(),
+         'optimizer_state_dict': self.discriminator_optimizer.state_dict(),
+         'loss': errD,
+          }, dis_file)
 
     def evaluate(self):
         self.generator.eval()
