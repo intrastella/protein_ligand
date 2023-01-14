@@ -121,4 +121,6 @@ if __name__ == '__main__':
     group.add_argument("--ckpt_path", help="Path of checkpoint.")
     group.add_argument("--best_ckpt", action='store_true', help="Use best trained model version.")
 
+    # parsed_args = parser.parse_args()
+    # args = vars(parsed_args)
     main(parser.parse_args())
