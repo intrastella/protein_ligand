@@ -129,10 +129,7 @@ if __name__ == '__main__':
     parser.add_argument("-ho", "--host", dest='HOST', help="Host for sql API.")
     parser.add_argument("-po", "--port", dest='PORT', help="Port for sql API.")
     parser.add_argument("-db", "--database", dest='db_name', help="Database name to use.")
-
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument("--ckpt_path", help="Path of checkpoint.")
-    group.add_argument("--best_ckpt", action='store_false', help="Use best trained model version.")
+    parser.add_argument("--ckpt_path", help="Path of checkpoint.")
 
     args = parser.parse_args()
     if args.SQL and not (args.HOST and args.PORT and args.db_name):
