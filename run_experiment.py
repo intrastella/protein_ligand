@@ -30,6 +30,7 @@ class Experiment:
                  model_conf: Dict,
                  dataset: DataLoader,
                  exp_id: str = None, 
+                 ckpt_path: str = None,
                  best_ckpt = True):
 
         self.dataset = dataset
@@ -46,7 +47,7 @@ class Experiment:
         self.ckpt_dir = self.exp_dir / 'model_ckpts'
         self.ckpt_dir.mkdir(parents=True, exist_ok=True)
 
-        self.ckpt_path = None
+        self.ckpt_path = ckpt_path
 
         self.model = get_model(model, model_conf['Hyperparameter'], self.ckpt_path)
 
@@ -73,18 +74,21 @@ def main(opt):
             raise Exception(f"No {mol_type} found in {db_name} database and no path for dataloader ingestion was given.")
 
     logger.info(f"Creating experiment for model {opt.model}.")
-    mol_feat = get_loader(path2data=opt.path, **model_conf['data'])
-    exp = Experiment(Architecture(opt.model), model_conf, mol_feat)
+    mol_feat = get_loader(path2data=opt.data_path, **model_conf['data'])
+    if opt.ckpt_path:
+        exp = Experiment(Architecture(opt.model), model_conf, mol_feat, ckpt_path=opt.ckpt_path, best_ckpt=False)
+    else:
+        exp = Experiment(Architecture(opt.model), model_conf, mol_feat)
     exp.run()
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", help="Name of model.", required=True)
-    parser.add_argument("--path", help="Path of dataset.")
+    parser.add_argument("--data_path", help="Path of dataset.")
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("--ckpt", help="Path of checkpoint.")
+    group.add_argument("--ckpt_path", help="Path of checkpoint.")
     group.add_argument("--best_ckpt", action='store_false', help="Use best trained model version.")
 
     main(parser.parse_args())
