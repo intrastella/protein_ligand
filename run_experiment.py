@@ -135,7 +135,7 @@ if __name__ == '__main__':
     group.add_argument("--best_ckpt", action='store_false', help="Use best trained model version.")
 
     args = parser.parse_args()
-    if args.SQL and not (args.HOST and args.PORT and args.database):
+    if args.SQL and not (args.HOST and args.PORT and args.db_name):
         parser.error('Please specify [-ho HOST], [-po PORT] and [-db DATABASE].')
     # parsed_args = parser.parse_args()
     # args = vars(parsed_args)
