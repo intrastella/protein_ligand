@@ -1,15 +1,16 @@
 from datetime import datetime
 from pathlib import Path
-from typing import List, Union
+from typing import List, Union, Dict
 
 import numpy as np
 import tensorflow as tf
 import torch
 import torch.nn.functional as F
+
 from torch import nn
 
 
-def create_exp_folder():
+def create_exp_folder() -> Path:
     cwd = Path().absolute()
     now = datetime.now()
     exp_id = now.strftime("%d-%m-%Y_%H-%M-%S")
@@ -17,6 +18,14 @@ def create_exp_folder():
     p = Path(folder)
     p.mkdir(parents=True, exist_ok=True)
     return p
+    
+    
+def update_conf(conf: Dict, new_vals: Dict, file_path: Union[Path, str]):
+    for key in new_vals.keys:
+        conf[key] = new_vals[key]
+    
+    with open(file_path, 'w') as f:
+        yaml.dump(doc, f)
 
 
 def one_hot_enc(elem: Union[str, int, float, bool], permitted: List[str] = None) -> List[Union[int, float]]:
