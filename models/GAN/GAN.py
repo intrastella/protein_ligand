@@ -124,7 +124,7 @@ class GAN(nn.Module):
                  lr: float,
                  b1: float,
                  b2: float,
-                 ckpt_path):
+                 ckpt_path: Union[str, Path] = None):
         super(GAN, self).__init__()
 
         torch.cuda.empty_cache()
@@ -237,12 +237,12 @@ class GAN(nn.Module):
             tb = SummaryWriter(folder)
 
             running_loss += errD.item()
-            if (step+1) % 1000 == 0:
+            if (total_step + 1) % 1000 == 0:
                 tb.add_scalar('Discriminator_Loss',
                                   running_loss / 1,
                                   total_step)
 
-            '''if total_step % 10 == 0:
+            '''if total_step % 1000 == 0:
                 # true - preds
                 generator_score = valid
                 discriminator_pred = true_discriminator_out
