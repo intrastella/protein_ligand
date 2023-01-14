@@ -26,7 +26,8 @@ def get_loader(db_name: str,
                batch_size: int,
                table_names: Union[str, List[str]] = None,
                amount: int = None,
-               path2data: str = None):
+               path2data: str = None,
+               db_insertion: bool = True):
 
     if mol_struct == MolDataStruct.SMILE.value:
         converter = Smile2Mat(path2mol=path2data)
