@@ -16,6 +16,7 @@ You can execute a run via `./run_experiment.py` and see metrics and results via 
 
 > 1. Model will be required and path to dataset if you haven't stored them in a sql table from a previous experiment with this model:  `--model [model name] --data_path [dataset path]` <br>
 > 2. If it's your first experiment w/ this model you can save the given dataset in a table so they won't need to be processed again for another experiment by additionally writing `-sql [-ho HOST] [-po PORT] [-db DATABASE]` in command line.
+> 3. If you trained that model already several times you can specify a checkpoint by giving the absolute path `[--ckpt_path CKPT_PATH]` . As default it will choose the best best checkpoint - meaning the one with the least amount of loss.
 > 3. After a run write in command line:
 `tensorboard --logdir [path to runs folder]` and open the link provided to see results.
 
