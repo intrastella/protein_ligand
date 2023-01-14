@@ -1,0 +1,4 @@
+[FileLocation]
+Data = "data/data_conf.yaml"
+GAN = "models/GAN/GAN/gan_config.yaml"
+Transformer = "models/Transformer/Transformer/gan_config.yaml"
