@@ -114,10 +114,10 @@ def main(args):
 
     logger.info(f"Creating experiment for model {args.model}.")
     mol_feat = get_loader(path2data=opt.data_path, **model_conf['data'], db_insertion=db_insertion)
-    if not args.best_ckpt:
-        exp = Experiment(Architecture(opt.model), model_conf, mol_feat, ckpt_path=args.ckpt_path, best_ckpt=args.best_ckpt)
-    else:
-        exp = Experiment(Architecture(opt.model), model_conf, mol_feat)
+    
+    if args.ckpt_path:
+        best_ckpt = False
+    exp = Experiment(Architecture(opt.model), model_conf, mol_feat, ckpt_path=args.ckpt_path, best_ckpt=best_ckpt)
     exp.run()
 
 
