@@ -44,7 +44,10 @@ class Experiment:
         self.ckpt_dir = self.exp_dir / 'model_ckpts'
         self.ckpt_dir.mkdir(parents=True, exist_ok=True)
         
-        self.model = get_model(model, model_conf['Hyperparameter'], ckpt_path, best_ckpt)
+        if best_ckpt:
+            ckpt_path = self.best_ckpt
+            
+        self.model = get_model(model, model_conf['Hyperparameter'], ckpt_path)
 
     def run(self):
         self.model.fit(self.dataset, self.exp_dir)
