@@ -23,7 +23,8 @@ Your SQL credentials needs to be saved in `./data/data_conf.yaml.py` :
 > USER: <br>
 > PASSWORD: <br>
 > HOST: <br>
-> PORT:
+> PORT: <br>
+> DATABSE
 
 <h2> Goals </h2>
 Create a proper structure for my own DL project.
