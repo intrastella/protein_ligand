@@ -98,22 +98,22 @@ def main(args):
     if args.SQL:
         
         if args.data_path:
-            # get user and password w/ bypass
             mol_feat = get_loader(path2data=args.data_path, **conf[Architecture(args.model)].data)
-            user = input("User :")
-            pwd = getpass.getpass("Password :")
             conf.Credentials.HOST = args.HOST
             conf.Credentials.PORT = args.PORT
-            conf.Credentials.USER = user
-            conf.Credentials.PASSWORD = pwd
             
         else:
             db_name = conf[Architecture(args.model)].data.db_name
             mol_type = conf[Architecture(args.model)].data.mol_type
             if not db_name:
                 raise Exception('No database for this project was created. Please give a path to a dataset.')
-    
+            
+            user = input("User :")
+            pwd = getpass.getpass("Password :")
+            conf.Credentials.USER = user
+            conf.Credentials.PASSWORD = pwd
             session = SQL_Session(**conf.Credentials)
+            
             if not session.df_exists('mol_rec'):
                 raise Exception(f"No {mol_type} found in {db_name} database and no path for dataloader ingestion was given.")
             
