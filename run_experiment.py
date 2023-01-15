@@ -39,7 +39,7 @@ from torch.utils.data import DataLoader
 from data.db_tools import SQL_Session
 from models.GAN.data_loader import get_loader
 from models.arch_utils import Architecture, get_model
-from utils import create_exp_folder, get_config, update_conf
+from utils import create_exp_folder, get_config, update_conf, set_logger
 
 
 __author__ = "Stella Muamba Ngufulu"
@@ -53,13 +53,7 @@ __status__ = "Dev"
 __version__ = "0.0.1"
 
 
-cwd = Path().absolute()
-logging.basicConfig(level=logging.INFO,
-                    filename=f'{cwd}/std.log',
-                    format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
-                    filemode='w')
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
+set_logger(__name__)
 
 
 class Experiment:
