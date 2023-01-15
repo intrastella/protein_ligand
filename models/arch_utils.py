@@ -51,15 +51,3 @@ def get_model(model_name: Architecture, model_conf: Dict, ckpt_path: Union[str, 
         model = MultiHead(**model_conf)
 
     return model
-
-
-def get_config(model: Architecture):
-    conf = None
-    cwd = Path().absolute()
-    if model == Architecture.GAN:
-        file = 'GAN/gan_config.yaml'
-        conf = yaml.safe_load(Path(f'{cwd}/models/{file}').read_text())
-    elif model == Architecture.TRANSFORMER:
-        file = None
-        conf = yaml.safe_load(Path('GAN/gan_config.yaml').read_text())
-    return conf
