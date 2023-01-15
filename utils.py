@@ -1,3 +1,4 @@
+import getpass
 import logging
 import logging.config
 import toml
@@ -14,6 +15,12 @@ import torch
 import torch.nn.functional as F
 
 from torch import nn
+
+
+class Password(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string):
+        values = getpass.getpass()
+        setattr(namespace, self.dest, values)
 
 
 def set_logger(name):
