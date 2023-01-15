@@ -3,8 +3,8 @@ import logging
 import sys
 from pathlib import Path
 from typing import List, Union
-import numpy as np
 
+import numpy as np
 import torch
 import yaml
 from atom3d.datasets import LMDBDataset
@@ -13,10 +13,9 @@ from rdkit import Chem
 from rdkit.Chem import GetAdjacencyMatrix
 from tqdm import tqdm
 
-from data.MolEnums import Degree, FormalCharge, Hybridization, Chiral, TotalNumHs, Stereo, InRing, IsAromatic, \
-    IsConjugated, FeatTables, MolType
+import data.MolEnums 
 from data.db_tools import SQL_Session
-from utils import one_hot_enc, pad_tensor, pad_batch
+from utils import one_hot_enc, pad_tensor, pad_batch, get_config
 
 
 cwd = Path().absolute()
@@ -182,10 +181,8 @@ class Smile2Mat:
         session.close()
 
     def create_connection(self, db_name: str):
-        cwd = Path().absolute()
-        log_data = yaml.safe_load(Path(f'{cwd}/data/data_conf.yaml').read_text())
-        log_data['Credentials']['DATABASE'] = db_name
-        return SQL_Session(**log_data['Credentials'])
+        conf = get_config()
+        return SQL_Session(**conf.Credentials)
 
     def get_smiles_dataset(self,
                            db_name: str = None,
