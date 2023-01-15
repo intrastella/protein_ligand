@@ -100,8 +100,12 @@ def main(args):
         if args.data_path:
             # get user and password w/ bypass
             mol_feat = get_loader(path2data=args.data_path, **conf[Architecture(args.model)].data)
+            user = input("User :")
+            pwd = getpass.getpass("Password :")
             conf.Credentials.HOST = args.HOST
             conf.Credentials.PORT = args.PORT
+            conf.Credentials.USER = user
+            conf.Credentials.PASSWORD = pwd
             
         else:
             db_name = conf[Architecture(args.model)].data.db_name
@@ -131,6 +135,10 @@ def main(args):
                     ckpt_path=args.ckpt_path, 
                     best_ckpt=best_ckpt)
     exp.run()
+    
+    # remove username and password from config file
+    conf.Credentials.USER = ''
+    conf.Credentials.PASSWORD = ''
 
 
 if __name__ == '__main__':
@@ -141,6 +149,7 @@ if __name__ == '__main__':
     parser.add_argument("-ho", "--host", dest='HOST', help="Host for sql API.")
     parser.add_argument("-po", "--port", dest='PORT', help="Port for sql API.")
     parser.add_argument("-db", "--database", dest='db_name', help="Database name to use.")
+    # parser.add_argument('-p', '--password', action=Password, nargs='?', dest='password')
     parser.add_argument("--ckpt_path", help="Path of checkpoint.")
 
     args = parser.parse_args()
