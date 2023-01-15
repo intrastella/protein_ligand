@@ -82,7 +82,7 @@ class Experiment:
         if best_ckpt:
             ckpt_path = self.best_ckpt
             
-        self.model = get_model(model, model_conf['Hyperparameter'], ckpt_path)
+        self.model = get_model(model, model_conf.Hyperparameter, ckpt_path)
 
     def run(self):
         self.model.fit(self.dataset, self.exp_dir)
@@ -90,7 +90,13 @@ class Experiment:
 
     @property
     def best_ckpt(self):
-        pass
+        all_dir = []
+        prefix_name = f'experiment/exp_id'
+        for d in profiler_dir.glob(f'{prefix_name}*'):
+            all_dir.append(d.stem)
+        all_dir.sort(
+        key=lambda date: datetime.strptime(date.replace(prefix_name, ''), "%d-%m-%Y_%H-%M-%S"))
+        latest_dir = profiler_dir / all_dir.pop() / 'profiling_results'
 
 
 def main(args):
