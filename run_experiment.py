@@ -38,8 +38,8 @@ from torch.utils.data import DataLoader
 
 from data.db_tools import SQL_Session
 from models.GAN.data_loader import get_loader
-from models.arch_utils import Architecture, get_model, get_config
-from utils import create_exp_folder, update_conf
+from models.arch_utils import Architecture, get_model
+from utils import create_exp_folder, get_config, update_conf
 
 
 __author__ = "Stella Muamba Ngufulu"
@@ -100,46 +100,42 @@ class Experiment:
 
 
 def main(args):
-    model_conf = get_config(Architecture(args.model))
+    conf = get_config()
     if args.SQL:
         
         if args.data_path:
             # get user and password w/ bypass
-            mol_feat = get_loader(path2data=opt.data_path, **model_conf['data'], db_insertion=True)
-            update_cred = {
-                'USER': 
-                'PASSWORD':
-                'HOST': args.HOST
-                'PORT': args.PORT}
-                
-            update_conf(model_conf, update_cred, section=['Credentials'])
+            mol_feat = get_loader(path2data=args.data_path, **conf[Architecture(args.model)].data)
+            conf.Credentials.HOST = args.HOST
+            conf.Credentials.PORT = args.PORT
             
         else:
-            # just sql
+            db_name = conf[Architecture(args.model)].data.db_name
+            mol_type = conf[Architecture(args.model)].data.mol_type
+            if not db_name:
+                raise Exception('No database for this project was created. Please give a path to a dataset.')
+    
+            session = SQL_Session(**conf.Credentials)
+            if not session.df_exists('mol_rec'):
+                raise Exception(f"No {mol_type} found in {db_name} database and no path for dataloader ingestion was given.")
             
+            mol_feat = get_loader(db_insertion=False, **conf[Architecture(args.model)].data)
+    
     else:
         # model and path
-        pass
-        
-        
-    model_conf = get_config(Architecture(args.model))
-    cwd = Path().absolute()
-    log_data = yaml.safe_load(Path(f'{cwd}/data/data_conf.yaml').read_text())
-    log_data['Credentials']['DATABASE'] = model_conf['data']['db_name']
-    session = SQL_Session(**log_data['Credentials'])
-
-    if not session.df_exists('mol_rec'):
-        if not args.path:
-            mol_type = model_conf['data']['mol_type']
-            db_name = model_conf['data']['db_name']
-            raise Exception(f"No {mol_type} found in {db_name} database and no path for dataloader ingestion was given.")
+        conf[Architecture(args.model)].data.db_name = args.db_name
+        mol_feat = get_loader(path2data=args.data_path, db_insertion=False, **conf[Architecture(args.model)].data)
 
     logger.info(f"Creating experiment for model {args.model}.")
-    mol_feat = get_loader(path2data=opt.data_path, **model_conf['data'], db_insertion=db_insertion)
     
     if args.ckpt_path:
         best_ckpt = False
-    exp = Experiment(Architecture(opt.model), model_conf, mol_feat, ckpt_path=args.ckpt_path, best_ckpt=best_ckpt)
+        
+    exp = Experiment(Architecture(args.model), 
+                    conf[Architecture(args.model)], 
+                    mol_feat, 
+                    ckpt_path=args.ckpt_path, 
+                    best_ckpt=best_ckpt)
     exp.run()
 
 
