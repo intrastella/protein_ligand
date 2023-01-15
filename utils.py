@@ -1,3 +1,6 @@
+import toml
+
+from box import Box
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
@@ -11,13 +14,10 @@ import torch.nn.functional as F
 from torch import nn
 
 
-class FileLocation(Enum):
-    DataConfig = Path('data/data_conf.yaml')
-    GANConfig = Path('models/GAN/GAN/gan_config.yaml')
-    TransformerConfig = Path('models/Transformer/Transformer/gan_config.yaml')
-
-
 def create_exp_folder() -> Path:
+    """
+    Creates and returns a new experiment directory
+    """
     cwd = Path().absolute()
     now = datetime.now()
     exp_id = now.strftime("%d-%m-%Y_%H-%M-%S")
@@ -27,15 +27,13 @@ def create_exp_folder() -> Path:
     return p
     
     
-def get_config(model: Architecture):
-    conf = None
+def get_config():
+    """
+    returns a toml dict as instance from box, i.e. dot notation 
+    """
     cwd = Path().absolute()
-    if model == Architecture.GAN:
-        file = 'GAN/gan_config.yaml'
-        conf = yaml.safe_load(Path(f'{cwd}/models/{file}').read_text())
-    elif model == Architecture.TRANSFORMER:
-        file = None
-        conf = yaml.safe_load(Path('GAN/gan_config.yaml').read_text())
+    location = cwd / 'config.toml'
+    data = Box(toml.load(location))
     return conf
     
     
