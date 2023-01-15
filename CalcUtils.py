@@ -12,10 +12,6 @@ from torch import nn
 
 @lru_cache(maxsize = 100)
 def one_hot_enc(elem: Union[str, int, float, bool], permitted: List[str] = None) -> List[Union[int, float]]:
-    """
-    Maps input elements x which are not in the permitted list to the last element
-    of the permitted list.
-    """
     if elem not in permitted:
         elem = permitted[-1]
 
