@@ -1,0 +1,21 @@
+[Credentials]
+USER = "root"
+PASSWORD = "None"
+HOST = "127.0.0.1"
+PORT = 3306
+
+[GAN.Hyperparameter]
+batch_size = 60
+training_steps = 200
+n_epoch = 3
+n_critic = 5
+lr = 0.0002
+b1 = 0.5
+b2 = 0.999
+
+[GAN.data]
+db_name = "ligand_protein"
+mol_struct = "smile"
+mol_type = "ligand"
+batch_size = 60
+amount = 5
