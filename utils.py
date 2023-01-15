@@ -16,7 +16,7 @@ import torch.nn.functional as F
 from torch import nn
 
 
-def configure_logger(name):
+def set_logger(name):
     cwd = Path().absolute()
     log_path = cwd / 'std.log'
     logging.config.dictConfig({
