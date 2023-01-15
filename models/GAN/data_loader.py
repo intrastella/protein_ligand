@@ -31,7 +31,7 @@ def get_loader(db_name: str,
 
     if mol_struct == MolDataStruct.SMILE.value:
         converter = Smile2Mat(path2mol=path2data)
-        mol_feat = converter.get_smiles_dataset(db_name, MolType(mol_type), table_names, amount, db_insertion=True)
+        mol_feat = converter.get_smiles_dataset(db_name, MolType(mol_type), table_names, amount, db_insertion=db_insertion)
         train_data = SMILE_Dataset(mol_feat)
         trainer = DataLoader(train_data, batch_size=batch_size, shuffle=False)
         return trainer
