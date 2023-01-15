@@ -90,13 +90,16 @@ class Experiment:
 
     @property
     def best_ckpt(self):
-        all_dir = []
+        all_loss = []
+        cwd = Path().absolute()
         prefix_name = f'experiment/exp_id'
-        for d in profiler_dir.glob(f'{prefix_name}*'):
-            all_dir.append(d.stem)
-        all_dir.sort(
-        key=lambda date: datetime.strptime(date.replace(prefix_name, ''), "%d-%m-%Y_%H-%M-%S"))
-        latest_dir = profiler_dir / all_dir.pop() / 'profiling_results'
+        for d in cwd.glob(f'{prefix_name}*'):
+            exp = d / 'model_ckpts'
+            for f in exp.glob(f'*'):
+              # model init
+              m = torch.load(f)
+              all_loss.appand(m['loss'])
+        return max(all_loss)
 
 
 def main(args):
