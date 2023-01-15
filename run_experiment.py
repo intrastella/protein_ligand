@@ -71,7 +71,7 @@ class Experiment:
             self.exp_dir = create_exp_folder()
 
         else:
-            self.exp_dir = Path(f'{cwd}/exp_id')
+            self.exp_dir = cwd / 'exp_id'
 
         self.weight_dir = self.exp_dir / 'weights'
         self.weight_dir.mkdir(parents=True, exist_ok=True)
@@ -120,7 +120,6 @@ def main(args):
             mol_feat = get_loader(db_insertion=False, **conf[Architecture(args.model)].data)
     
     else:
-        # model and path
         conf[Architecture(args.model)].data.db_name = args.db_name
         mol_feat = get_loader(path2data=args.data_path, db_insertion=False, **conf[Architecture(args.model)].data)
 
