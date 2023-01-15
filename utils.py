@@ -1,3 +1,5 @@
+import logging
+import logging.config
 import toml
 
 from box import Box
@@ -12,6 +14,41 @@ import torch
 import torch.nn.functional as F
 
 from torch import nn
+
+
+def configure_logger(name):
+    cwd = Path().absolute()
+    log_path = cwd / 'std.log'
+    logging.config.dictConfig({
+        'version': 1,
+        'formatters': {
+            'default': {'format': '%(asctime)s - %(levelname)s - %(message)s', 'datefmt': '%Y-%m-%d %H:%M:%S'}
+        },
+        'handlers': {
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+                'formatter': 'default',
+                'stream': 'ext://sys.stdout'
+            },
+            'file': {
+                'level': 'DEBUG',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'formatter': 'default',
+                'filename': log_path,
+                'maxBytes': 1024,
+                'backupCount': 3
+            }
+        },
+        'loggers': {
+            'default': {
+                'level': 'DEBUG',
+                'handlers': ['console', 'file']
+            }
+        },
+        'disable_existing_loggers': False
+    })
+    return logging.getLogger(name)
 
 
 def create_exp_folder() -> Path:
@@ -35,14 +72,6 @@ def get_config():
     location = cwd / 'config.toml'
     data = Box(toml.load(location))
     return conf
-    
-    
-def update_conf(conf: Dict, new_vals: Dict, file_path: Path, section: str):
-    for key in new_vals.keys:
-        conf[section][key] = new_vals[key]
-    
-    with open(file_path, 'w') as f:
-        yaml.dump(doc, f)
 
 
 def one_hot_enc(elem: Union[str, int, float, bool], permitted: List[str] = None) -> List[Union[int, float]]:
@@ -102,14 +131,6 @@ def create_binary_list_from_int(number: int) -> List[int]:
         raise ValueError("Only Positive integers are allowed")
 
     return [int(x) for x in list(bin(number))[2:]]
-
-
-def get_device():
-    if torch.cuda.is_available():
-        device = torch.device('cuda:0')
-    else:
-        device = torch.device('cpu')
-    return device
 
 
 def df_to_tensor(df):
