@@ -2,6 +2,14 @@ import torch
 from keras import backend
 
 
+def get_device():
+    if torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    else:
+        device = torch.device('cpu')
+    return device
+
+
 def wasserstein_loss(y_true, y_pred):
     return backend.mean(y_true * y_pred)
 
