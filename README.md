@@ -1,7 +1,7 @@
 # Ligand - Protein 
 A repo for experimenting on creating ligands w/ high binding affinity to a target protein using ML.
 
-Architecture consits of GAN and Transformer model. Smiles data was used for ligands and sequencer for proteins. 
+Architecture consits of GAN and Transformer model. Smiles data was used for ligands and sequences for proteins. 
 
 **Databases**:
 
