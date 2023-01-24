@@ -6,6 +6,7 @@ from enum import Enum
 from pathlib import Path
 
 from models.GAN.GAN import GAN
+from models.Transformer.transformer import MultiHead, VAE
 from utils import set_logger
 
 
@@ -41,6 +42,6 @@ def get_model(model_name: Architecture, model_conf: Dict, ckpt_path: Union[str, 
         model.setup()
 
     elif model_name == Architecture.TRANSFORMER:
-        pass
+        model = MultiHead(**model_conf)
 
     return model

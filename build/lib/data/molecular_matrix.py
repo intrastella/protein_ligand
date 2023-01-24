@@ -1,25 +1,30 @@
 import datetime
-from typing import List
-from typing import Union
+import logging
+import sys
+from pathlib import Path
+from typing import List, Union
 
 import numpy as np
 import torch
+import yaml
 from atom3d.datasets import LMDBDataset
 
 from rdkit import Chem
 from rdkit.Chem import GetAdjacencyMatrix
 from tqdm import tqdm
 
-import data.MolEnums as me
+import data.MolEnums 
 from data.db_tools import SQL_Session
-from CalcUtils import one_hot_enc
-from CalcUtils import pad_tensor
-from CalcUtils import pad_batch
-from utils import get_config
-from utils import set_logger
+from utils import one_hot_enc, pad_tensor, pad_batch, get_config
 
 
-logger = set_logger(__name__)
+cwd = Path().absolute()
+logging.basicConfig(level=logging.INFO,
+                    filename=f'{cwd}/std.log',
+                    format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+                    filemode='w')
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
 
 
 class Smile2Mat:
@@ -44,11 +49,11 @@ class Smile2Mat:
             self.permitted_list_of_atoms += ['H']
 
         atom_type_enc = one_hot_enc(str(atom.GetSymbol()), self.permitted_list_of_atoms)
-        n_heavy_neighbors_enc = one_hot_enc(int(atom.GetDegree()), me.Degree.values())
-        formal_charge_enc = one_hot_enc(int(atom.GetFormalCharge()), me.FormalCharge.values())
-        hybridisation_type_enc = one_hot_enc(str(atom.GetHybridization()), me.Hybridization.values())
-        in_ring_enc = one_hot_enc(atom.IsInRing(), me.InRing.values())
-        is_aromatic_enc = one_hot_enc(atom.GetIsAromatic(), me.IsAromatic.values())
+        n_heavy_neighbors_enc = one_hot_enc(int(atom.GetDegree()), Degree.values())
+        formal_charge_enc = one_hot_enc(int(atom.GetFormalCharge()), FormalCharge.values())
+        hybridisation_type_enc = one_hot_enc(str(atom.GetHybridization()), Hybridization.values())
+        in_ring_enc = one_hot_enc(atom.IsInRing(), InRing.values())
+        is_aromatic_enc = one_hot_enc(atom.GetIsAromatic(), IsAromatic.values())
 
         atomic_mass_scaled = [float((atom.GetMass() - 10.812) / 116.092)]
         vdw_radius_scaled = [float((Chem.GetPeriodicTable().GetRvdw(atom.GetAtomicNum()) - 1.5) / 0.6)]
@@ -65,11 +70,11 @@ class Smile2Mat:
                                covalent_radius_scaled
 
         if use_chirality:
-            chirality_type_enc = one_hot_enc(str(atom.GetChiralTag()), me.Chiral.values())
+            chirality_type_enc = one_hot_enc(str(atom.GetChiralTag()), Chiral.values())
             atom_features_vector += chirality_type_enc
 
         if hydrogens_implicit:
-            n_hydrogens_enc = one_hot_enc(int(atom.GetTotalNumHs()), me.TotalNumHs.values())
+            n_hydrogens_enc = one_hot_enc(int(atom.GetTotalNumHs()), TotalNumHs.values())
             atom_features_vector += n_hydrogens_enc
 
         return np.array(atom_features_vector)
@@ -77,18 +82,18 @@ class Smile2Mat:
     def get_bond_features(self, bond, use_stereochemistry=True):
 
         bond_type_enc = one_hot_enc(bond.GetBondType(), self.permitted_list_of_bond_types)
-        bond_is_conj_enc = one_hot_enc(bond.GetIsConjugated(), me.IsConjugated.values())
-        bond_is_in_ring_enc = one_hot_enc(bond.IsInRing(), me.InRing.values())
+        bond_is_conj_enc = one_hot_enc(bond.GetIsConjugated(), IsConjugated.values())
+        bond_is_in_ring_enc = one_hot_enc(bond.IsInRing(), InRing.values())
 
         bond_feature_vector = bond_type_enc + bond_is_conj_enc + bond_is_in_ring_enc
 
         if use_stereochemistry:
-            stereo_type_enc = one_hot_enc(str(bond.GetStereo()), me.Stereo.values())
+            stereo_type_enc = one_hot_enc(str(bond.GetStereo()), Stereo.values())
             bond_feature_vector += stereo_type_enc
 
         return np.array(bond_feature_vector)
 
-    def smiles2data(self, smiles: list, db_name: str, mol_type: me.MolType, db_insertion: bool = False) -> torch.Tensor:
+    def smiles2data(self, smiles: list, db_name: str, mol_type: MolType, db_insertion: bool = False) -> torch.Tensor:
         """
 
         :param smiles:
@@ -138,7 +143,7 @@ class Smile2Mat:
             mol_edges[k] = self.get_bond_features(self.mol.GetBondBetweenAtoms(int(i), int(j)))
         return torch.from_numpy(mol_edges)
 
-    def db_ingestion(self, dataset: torch.Tensor, mol_type: me.MolType, db_name: str):
+    def db_ingestion(self, dataset: torch.Tensor, mol_type: MolType, db_name: str):
         """
 
         :param dataset:
@@ -168,7 +173,7 @@ class Smile2Mat:
             session.insert_in2_mol_rec(mol_type, datetime.date.today(), True, True, True)
         logger.info('Insertion into molecule records completed.')
 
-        for table, feat, col_name in zip(me.FeatTables.values(), features, col_names):
+        for table, feat, col_name in zip(FeatTables.values(), features, col_names):
             if not session.df_exists(table):
                 session.create_feat_tables(table, col_name)
             session.quick_insert(table, feat.reshape(feat.shape[0] * feat.shape[1], feat.shape[2]), col_name)
@@ -181,7 +186,7 @@ class Smile2Mat:
 
     def get_smiles_dataset(self,
                            db_name: str = None,
-                           mol_type: me.MolType = None,
+                           mol_type: MolType = None,
                            table_names: Union[str, List[str]] = None,
                            amount: int = None,
                            db_insertion: bool = False):
@@ -220,7 +225,7 @@ class Smile2Mat:
                 for name in table_names:
                     mol_feat.append(session.get_data_from_db(db_name, name, amount, condition))
             else:
-                for name in me.FeatTables.values():
+                for name in FeatTables.values():
                     mol_feat.append(session.get_data_from_db(db_name, name, amount, condition))
             mol_feat = torch.cat(mol_feat, dim=3)
             mol_feat = torch.permute(mol_feat, (0, 3, 1, 2))
@@ -230,18 +235,18 @@ class Smile2Mat:
 
     def get_col_names(self):
          atom_feat = self.permitted_list_of_atoms + \
-            [f'{deg}_deg' for deg in me.Degree.values()] + \
-            [f'{charge}_charge' for charge in me.FormalCharge.values()] + \
-            [f'{name}_hyb' for name in me.Hybridization.values()] + \
-            [f'{str(me.InRing.values()[i])}_ring' for i in range(2)] + \
-            [f'{str(me.IsAromatic.values()[i])}_aromatic' for i in range(2)] + \
+            [f'{deg}_deg' for deg in Degree.values()] + \
+            [f'{charge}_charge' for charge in FormalCharge.values()] + \
+            [f'{name}_hyb' for name in Hybridization.values()] + \
+            [f'{str(InRing.values()[i])}_ring' for i in range(2)] + \
+            [f'{str(IsAromatic.values()[i])}_aromatic' for i in range(2)] + \
             ['atomic_mass_scaled', 'vdw_radius_scaled', 'covalent_radius_scaled'] + \
-            me.Chiral.values() + \
-            [f'{numH}_Hs' for numH in me.TotalNumHs.values()]
+            Chiral.values() + \
+            [f'{numH}_Hs' for numH in TotalNumHs.values()]
 
          bond_feat = ['single', 'double', 'tripple', 'aromatic'] + \
-            [f'{str(me.IsConjugated.values()[i])}_conjug' for i in range(2)] + \
-            [f'{str(me.InRing.values()[i])}_ring' for i in range(2)] + \
-            me.Stereo.values()
+            [f'{str(IsConjugated.values()[i])}_conjug' for i in range(2)] + \
+            [f'{str(InRing.values()[i])}_ring' for i in range(2)] + \
+            Stereo.values()
 
          return atom_feat, bond_feat

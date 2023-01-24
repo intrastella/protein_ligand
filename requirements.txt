@@ -50,6 +50,7 @@ py-cpuinfo==9.0.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pyrr==0.10.3
+python-box==6.1.0
 python-dateutil==2.8.2
 python-dotenv==0.21.0
 pytz==2022.7
@@ -70,6 +71,7 @@ tensorflow-estimator==2.11.0
 tensorflow-io-gcs-filesystem==0.29.0
 termcolor==2.2.0
 threadpoolctl==3.1.0
+toml==0.10.2
 torch==1.13.1
 tqdm==4.64.1
 typing_extensions==4.4.0

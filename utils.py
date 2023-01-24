@@ -5,22 +5,17 @@ import toml
 
 from box import Box
 from datetime import datetime
-from enum import Enum
 from pathlib import Path
-from typing import List, Union, Dict
 
-import numpy as np
-import tensorflow as tf
 import torch
-import torch.nn.functional as F
 
-from torch import nn
+from models.model_utils import get_device
 
 
-class Password(argparse.Action):
+'''class Password(argparse.Action):
     def __call__(self, parser, namespace, values, option_string):
         values = getpass.getpass()
-        setattr(namespace, self.dest, values)
+        setattr(namespace, self.dest, values)'''
 
 
 def set_logger(name):
@@ -77,8 +72,7 @@ def get_config():
     """
     cwd = Path().absolute()
     location = cwd / 'config.toml'
-    data = Box(toml.load(location))
-    return conf
+    return Box(toml.load(location))
 
 
 def df_to_tensor(df):

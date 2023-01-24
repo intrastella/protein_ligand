@@ -1,15 +1,18 @@
+import os
 import logging
 from pathlib import Path
+from typing import List, Union
+
+import yaml
+from tqdm import tqdm
 
 import torch
 from torch.utils.data import Dataset
 from rdkit import Chem
 from rdkit.Chem import Draw
 
-from utils import set_logger
 
-
-logger = set_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def save_mol_img(mol: str, name: str):

@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: ligand-prediction
+Version: 0.0.0
+Summary: Ligand prediction repo for experimental purposes.
+Author: Stella Muamba Ngufulu
+Author-email: stellamuambangufulu@gmail.com
+License: MIT License
+Keywords: ligand prediction,dataloader processing,library
+Platform: linux
+Classifier: Operating System :: Unix
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7

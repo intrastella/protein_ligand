@@ -1,4 +1,6 @@
 import datetime
+import logging
+from pathlib import Path
 from typing import Dict
 
 import pandas as pd
@@ -18,10 +20,15 @@ import torch
 
 from data.MolEnums import MolType
 from utils import df_to_tensor
-from utils import set_logger
 
 
-logger = set_logger(__name__)
+cwd = Path().absolute()
+logging.basicConfig(level=logging.INFO,
+                    filename=f'{cwd}/std.log',
+                    format="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s",
+                    filemode='w')
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
 
 
 class SQL_Session:

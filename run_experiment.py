@@ -25,22 +25,22 @@
     -----------------------------------------------------------------------------------
 """
 
-
 import argparse
 import getpass
-import logging
 from pathlib import Path
 from typing import Dict
 
+import numpy as np
 import torch
-import yaml
 from torch.utils.data import DataLoader
 
 from data.db_tools import SQL_Session
 from models.GAN.data_loader import get_loader
-from models.arch_utils import Architecture, get_model
-from utils import create_exp_folder, get_config, update_conf, set_logger
-
+from models.arch_utils import Architecture
+from models.arch_utils import get_model
+from utils import create_exp_folder
+from utils import get_config
+from utils import set_logger
 
 __author__ = "Stella Muamba Ngufulu"
 __contact__ = "stellamuambangufulu@gmail.com"
@@ -52,8 +52,7 @@ __maintainer__ = "developer"
 __status__ = "Dev"
 __version__ = "0.0.1"
 
-
-set_logger(__name__)
+logger = set_logger(__name__)
 
 
 class Experiment:
@@ -61,9 +60,8 @@ class Experiment:
                  model: Architecture,
                  model_conf: Dict,
                  dataset: DataLoader,
-                 exp_id: str = None, 
-                 ckpt_path: str = None,
-                 best_ckpt: bool = True):
+                 exp_id: str = None,
+                 ckpt_path: str = None):
 
         self.dataset = dataset
 
@@ -71,6 +69,7 @@ class Experiment:
             self.exp_dir = create_exp_folder()
 
         else:
+            cwd = Path().absolute()
             self.exp_dir = cwd / 'exp_id'
 
         self.weight_dir = self.exp_dir / 'weights'
@@ -78,10 +77,10 @@ class Experiment:
 
         self.ckpt_dir = self.exp_dir / 'model_ckpts'
         self.ckpt_dir.mkdir(parents=True, exist_ok=True)
-        
-        if best_ckpt:
+
+        if not ckpt_path:
             ckpt_path = self.best_ckpt
-            
+
         self.model = get_model(model, model_conf.Hyperparameter, ckpt_path)
 
     def run(self):
@@ -89,61 +88,60 @@ class Experiment:
         # self.model.evaluate()
 
     @property
-    def best_ckpt(self):
-        all_loss = []
+    def best_ckpt(self) -> Path:
+        min_loss = -np.inf
+        best_ckpt_path = ''
         cwd = Path().absolute()
         prefix_name = f'experiment/exp_id'
         for d in cwd.glob(f'{prefix_name}*'):
             exp = d / 'model_ckpts'
             for f in exp.glob(f'*'):
-              # model init
-              m = torch.load(f)
-              all_loss.appand(m['loss'])
-        return max(all_loss)
+                m = torch.load(f)
+                if min_loss > m['loss']:
+                    best_ckpt_path = f
+                    min_loss = m['loss']
+        return best_ckpt_path
 
 
 def main(args):
     conf = get_config()
     if args.SQL:
-        
+
         if args.data_path:
             mol_feat = get_loader(path2data=args.data_path, **conf[Architecture(args.model)].data)
             conf.Credentials.HOST = args.HOST
             conf.Credentials.PORT = args.PORT
-            
+
         else:
             db_name = conf[Architecture(args.model)].data.db_name
             mol_type = conf[Architecture(args.model)].data.mol_type
             if not db_name:
                 raise Exception('No database for this project was created. Please give a path to a dataset.')
-            
+
             user = input("User :")
             pwd = getpass.getpass("Password :")
             conf.Credentials.USER = user
             conf.Credentials.PASSWORD = pwd
             session = SQL_Session(**conf.Credentials)
-            
+
             if not session.df_exists('mol_rec'):
-                raise Exception(f"No {mol_type} found in {db_name} database and no path for dataloader ingestion was given.")
-            
+                raise Exception(
+                    f"No {mol_type} found in {db_name} database and no path for dataloader ingestion was given.")
+
             mol_feat = get_loader(db_insertion=False, **conf[Architecture(args.model)].data)
-    
+
     else:
         conf[Architecture(args.model)].data.db_name = args.db_name
         mol_feat = get_loader(path2data=args.data_path, db_insertion=False, **conf[Architecture(args.model)].data)
 
     logger.info(f"Creating experiment for model {args.model}.")
-    
-    if args.ckpt_path:
-        best_ckpt = False
-        
-    exp = Experiment(Architecture(args.model), 
-                    conf[Architecture(args.model)], 
-                    mol_feat, 
-                    ckpt_path=args.ckpt_path, 
-                    best_ckpt=best_ckpt)
+
+    exp = Experiment(Architecture(args.model),
+                     conf[Architecture(args.model)],
+                     mol_feat,
+                     ckpt_path=args.ckpt_path)
     exp.run()
-    
+
     # remove username and password from config file
     conf.Credentials.USER = ''
     conf.Credentials.PASSWORD = ''
@@ -161,7 +159,7 @@ if __name__ == '__main__':
     parser.add_argument("--ckpt_path", help="Path of checkpoint.")
 
     args = parser.parse_args()
-    
+
     if args.data_path and args.SQL:
         if not (args.HOST or args.PORT or args.db_name):
             parser.error('Please specify [-ho HOST], [-po PORT] and [-db DATABASE].')
